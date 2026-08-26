@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    image: qa-shop-lab:latest
+    container_name: qa-shop-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      DATABASE_PATH: /app/data/qa_shop.db
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/api/health', timeout=3).status == 200 else 1)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  locust:
+    build: .
+    image: qa-shop-lab:latest
+    container_name: qa-shop-locust
+    profiles:
+      - performance
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./performance:/app/performance
+    ports:
+      - "8089:8089"
+    working_dir: /app
+    command: >
+      locust
+      -f /app/performance/locustfile.py
+      --host http://app:5000
+      --web-host 0.0.0.0
+      --web-port 8089

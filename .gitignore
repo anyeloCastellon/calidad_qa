@@ -1,0 +1,16 @@
+# Material docente: NO se publica en el repositorio publico.
+# Contiene la pauta de la actividad y herramientas que la resuelven.
+qa-shop-lab/teacher/
+
+# Base de datos generada en tiempo de ejecucion
+qa-shop-lab/data/*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+Thumbs.db

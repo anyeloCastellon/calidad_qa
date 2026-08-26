@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QA Shop{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body data-page="{% block page %}{% endblock %}">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">QA<span>SHOP</span></a>
+            <nav class="nav">
+                <a href="/" class="{{ 'active' if active == 'home' }}">Inicio</a>
+                <a href="/productos" class="{{ 'active' if active == 'products' }}">Productos</a>
+                <a href="/carrito" class="{{ 'active' if active == 'cart' }}">Carrito</a>
+                <a href="/login" class="{{ 'active' if active == 'login' }}">Ingresar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>QA Shop &middot; Ambiente local de pruebas</p>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

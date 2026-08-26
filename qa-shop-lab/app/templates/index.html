@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %} &middot; Inicio{% endblock %}
+{% block page %}home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>QA Shop</h1>
+    <p>Tienda de accesorios y equipamiento para gamers.</p>
+    <p class="hero-actions">
+        <a class="btn btn-primary" href="/productos">Ver productos</a>
+        <a class="btn btn-ghost" href="/carrito">Ir al carrito</a>
+    </p>
+</section>
+
+<section class="panel">
+    <h2>Estado del servicio</h2>
+    <p id="health-status" class="muted">Consultando...</p>
+</section>
+
+<section class="panel">
+    <h2>Interfaz de programacion</h2>
+    <p class="muted">La tienda expone una API REST en <code>/api</code>.</p>
+    <ul class="endpoint-list">
+        <li><code>GET /api/health</code></li>
+        <li><code>GET /api/products</code></li>
+        <li><code>GET /api/products/&lt;id&gt;</code></li>
+        <li><code>POST /api/carts</code></li>
+        <li><code>GET /api/carts/&lt;cart_id&gt;</code></li>
+        <li><code>POST /api/carts/&lt;cart_id&gt;/items</code></li>
+        <li><code>DELETE /api/carts/&lt;cart_id&gt;/items/&lt;item_id&gt;</code></li>
+        <li><code>POST /api/carts/&lt;cart_id&gt;/coupon</code></li>
+        <li><code>POST /api/checkout</code></li>
+        <li><code>POST /api/login</code></li>
+        <li><code>GET /api/me</code></li>
+        <li><code>GET /api/admin/orders</code></li>
+        <li><code>GET /api/admin/stats</code></li>
+        <li><code>GET /api/search?q=</code></li>
+        <li><code>GET /api/reports/summary</code></li>
+    </ul>
+</section>
+{% endblock %}

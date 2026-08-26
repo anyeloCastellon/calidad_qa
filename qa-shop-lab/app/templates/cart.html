@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %} &middot; Carrito{% endblock %}
+{% block page %}cart{% endblock %}
+
+{% block content %}
+<h1>Mi carrito</h1>
+<p class="muted">Carrito activo: <strong id="cart-id-label">-</strong></p>
+
+<div class="cart-panel">
+    <table class="cart-table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="cart-items">
+            <tr><td colspan="5" class="muted">Cargando...</td></tr>
+        </tbody>
+    </table>
+
+    <div class="cart-coupon">
+        <label for="coupon-input">Codigo de descuento</label>
+        <input type="text" id="coupon-input" placeholder="Ej: DUOC10" autocomplete="off">
+        <button class="btn btn-ghost" type="button" id="coupon-apply">Aplicar cupon</button>
+    </div>
+
+    <dl class="cart-totals">
+        <dt>Subtotal</dt><dd id="cart-subtotal">$0</dd>
+        <dt>Descuento</dt><dd id="cart-discount">$0</dd>
+        <dt class="strong">Total</dt><dd class="strong" id="cart-total">$0</dd>
+    </dl>
+
+    <div class="cart-actions">
+        <button class="btn btn-ghost" type="button" id="cart-new">Vaciar y crear nuevo carrito</button>
+        <button class="btn btn-primary" type="button" id="checkout-btn">Finalizar compra</button>
+    </div>
+</div>
+
+<div id="order-result" class="panel hidden">
+    <h2>Resultado de la compra</h2>
+    <pre id="order-detail"></pre>
+</div>
+{% endblock %}

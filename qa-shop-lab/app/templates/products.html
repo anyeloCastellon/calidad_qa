@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %} &middot; Productos{% endblock %}
+{% block page %}products{% endblock %}
+
+{% block content %}
+<h1>Catalogo</h1>
+
+<form class="search-bar" id="search-form">
+    <label for="search-input">Buscar producto</label>
+    <input type="text" id="search-input" name="q" placeholder="Ej: mouse" autocomplete="off">
+    <button class="btn btn-primary" type="submit">Buscar</button>
+    <button class="btn btn-ghost" type="button" id="search-reset">Ver todo</button>
+</form>
+
+<div id="product-grid" class="product-grid">
+    <p class="muted">Cargando productos...</p>
+</div>
+{% endblock %}

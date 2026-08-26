@@ -1,0 +1,283 @@
+{
+  "info": {
+    "_postman_id": "8a4f1c62-3d7e-4a11-9b52-2c9f0d1e7a10",
+    "name": "QA Shop Lab",
+    "description": "Coleccion de apoyo para el laboratorio de pruebas funcionales y no funcionales de QA Shop.\n\nLa coleccion NO contiene validaciones automaticas: cada peticion debe ser ejecutada, observada y documentada por el equipo de QA. Modifique libremente los cuerpos, cantidades y parametros para diseniar sus propios casos de prueba.\n\nVariables disponibles: base_url, product_id, cart_id, item_id, token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000", "type": "string" },
+    { "key": "product_id", "value": "1", "type": "string" },
+    { "key": "cart_id", "value": "1", "type": "string" },
+    { "key": "item_id", "value": "1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "01 - Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Estado del servicio."
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Listar productos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products"]
+        },
+        "description": "Catalogo completo con nombre, precio y stock."
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Obtener producto",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/products/{{product_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products", "{{product_id}}"]
+        },
+        "description": "Detalle de un producto. Pruebe distintos valores de product_id."
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Crear carrito",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/carts",
+          "host": ["{{base_url}}"],
+          "path": ["api", "carts"]
+        },
+        "description": "Crea un carrito vacio y devuelve su identificador. Copie el cart_id en la variable de la coleccion."
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Consultar carrito",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/carts/{{cart_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "carts", "{{cart_id}}"]
+        },
+        "description": "Detalle del carrito: items, subtotal, descuento y total."
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Agregar item al carrito",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/carts/{{cart_id}}/items",
+          "host": ["{{base_url}}"],
+          "path": ["api", "carts", "{{cart_id}}", "items"]
+        },
+        "description": "Agrega un producto al carrito. Modifique product_id y quantity para diseniar sus casos de prueba."
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Eliminar item del carrito",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/carts/{{cart_id}}/items/{{item_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "carts", "{{cart_id}}", "items", "{{item_id}}"]
+        },
+        "description": "Elimina una linea del carrito usando el item_id devuelto al agregarla."
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Aplicar cupon",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"code\": \"DUOC10\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/carts/{{cart_id}}/coupon",
+          "host": ["{{base_url}}"],
+          "path": ["api", "carts", "{{cart_id}}", "coupon"]
+        },
+        "description": "Aplica un codigo de descuento al carrito."
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Checkout",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"cart_id\": {{cart_id}}\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/checkout",
+          "host": ["{{base_url}}"],
+          "path": ["api", "checkout"]
+        },
+        "description": "Finaliza la compra de un carrito."
+      },
+      "response": []
+    },
+    {
+      "name": "10 - Login cliente",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"cliente@example.com\",\n    \"password\": \"cliente123\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "login"]
+        },
+        "description": "Autenticacion de un usuario con perfil cliente. Copie el token devuelto en la variable token."
+      },
+      "response": []
+    },
+    {
+      "name": "11 - Login administrador",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"admin123\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "login"]
+        },
+        "description": "Autenticacion de un usuario con perfil administrador."
+      },
+      "response": []
+    },
+    {
+      "name": "12 - Sesion actual",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "me"]
+        },
+        "description": "Devuelve el usuario asociado al token enviado."
+      },
+      "response": []
+    },
+    {
+      "name": "13 - Ordenes administrativas",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/orders",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "orders"]
+        },
+        "description": "Listado de ordenes del sistema. Pruebe tambien enviando la peticion sin la cabecera Authorization."
+      },
+      "response": []
+    },
+    {
+      "name": "14 - Estadisticas administrativas",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/stats",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "stats"]
+        },
+        "description": "Resumen administrativo. Compare el comportamiento con token de cliente, con token de administrador y sin token."
+      },
+      "response": []
+    },
+    {
+      "name": "15 - Buscar producto",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/search?q=mouse",
+          "host": ["{{base_url}}"],
+          "path": ["api", "search"],
+          "query": [{ "key": "q", "value": "mouse" }]
+        },
+        "description": "Busqueda por nombre de producto. Experimente con distintos textos de entrada."
+      },
+      "response": []
+    },
+    {
+      "name": "16 - Resumen de ventas e inventario",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/summary",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "summary"]
+        },
+        "description": "Resumen de ventas y valorizacion de inventario. Observe el tiempo de respuesta indicado por Postman."
+      },
+      "response": []
+    }
+  ]
+}
