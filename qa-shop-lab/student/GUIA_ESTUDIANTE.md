@@ -27,7 +27,7 @@ lleguen.
 |---|---|
 | Aplicación web | `http://localhost:5000` |
 | API REST | `http://localhost:5000/api` |
-| Requisitos a verificar | `student/REQUISITOS.md` |
+| Requisitos a verificar | Los entrega el docente durante la clase |
 | Plantilla de informe | `student/PLANTILLA_INFORME.md` |
 | Colección Postman | `postman/QA-Shop-Lab.postman_collection.json` |
 | Entorno Postman | `postman/QA-Shop-Lab.postman_environment.json` |
@@ -78,10 +78,14 @@ Antes de probar, hay que entender qué se está probando.
 - Recorran la aplicación en el navegador: inicio, productos, carrito, login.
 - Ejecuten `GET /api/health` y `GET /api/products` en Postman.
 - Anoten los datos reales del catálogo: id, nombre, precio y stock de cada producto.
-- Identifiquen qué endpoint corresponde a cada requisito de `REQUISITOS.md`.
+- Anoten, para cada parte del sistema, qué reglas creen que debería respetar.
 
-**Producto de esta fase:** una tabla que relacione cada requisito con el
-endpoint o la pantalla donde se puede verificar.
+**Producto de esta fase:** una lista de las reglas que, en su opinión, este
+sistema debería cumplir, y de la pantalla o el endpoint donde cada una se podría
+verificar.
+
+> Esa lista son sus **requisitos propuestos**. Más adelante el docente les
+> entregará la especificación que firmó el cliente y podrán compararlas.
 
 ---
 

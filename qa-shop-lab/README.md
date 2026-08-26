@@ -219,8 +219,10 @@ qa-shop-lab/
 | Archivo | Contenido |
 |---|---|
 | `GUIA_ESTUDIANTE.md` | La misión, las fases de trabajo y las reglas |
-| `REQUISITOS.md` | Los 8 requisitos funcionales y 5 no funcionales a verificar |
 | `PLANTILLA_INFORME.md` | Formato del informe de pruebas a entregar |
+
+> La **especificación de requisitos** no forma parte de este paquete: la entrega
+> el docente durante la clase.
 
 El material de apoyo docente (planificación de la sesión, preguntas guía y
 pauta de evaluación) se distribuye por separado y no forma parte de este

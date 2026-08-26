@@ -25,8 +25,9 @@ Material para los equipos en [`qa-shop-lab/student/`](qa-shop-lab/student):
 | Documento | Contenido |
 |---|---|
 | `GUIA_ESTUDIANTE.md` | La actividad, sus fases y las reglas de trabajo |
-| `REQUISITOS.md` | Requisitos funcionales y no funcionales a verificar |
 | `PLANTILLA_INFORME.md` | Formato del informe de pruebas a entregar |
+
+La especificación de requisitos a verificar se entrega durante la clase.
 
 ## Stack
 
