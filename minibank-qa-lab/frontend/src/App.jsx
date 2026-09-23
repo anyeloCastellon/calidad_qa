@@ -13,6 +13,7 @@ export default function App() {
     const { res, data } = await llamar('/cuenta', { token })
     if (res.status === 401) {
       setToken(null)
+      setCuenta(null)
       return
     }
     setCuenta(data)

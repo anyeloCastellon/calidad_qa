@@ -3,6 +3,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/tests:/srv/tests
     env_file:
       - path: ./backend/.env
         required: false

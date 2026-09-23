@@ -90,7 +90,7 @@ Los datos viven en memoria. Para volver al estado inicial:
 curl -X POST http://localhost:8000/api/reset
 ```
 
-o reinicie el backend.
+o reinicie el backend. Los logs del backend se ven con `docker compose logs -f backend`.
 
 ---
 
@@ -116,19 +116,23 @@ Cuerpo de `/api/transferir`:
 
 ## Pruebas automatizadas y complejidad
 
-Desde `backend/` con el entorno virtual activo:
+Con Docker, sin instalar nada más:
 
 ```bash
-pytest -v
+docker compose exec backend pytest -v
 ```
 
 ```bash
-pytest --cov=app --cov-branch --cov-report=term-missing
+docker compose exec backend pytest --cov=app --cov-branch --cov-report=term-missing
 ```
 
 ```bash
-radon cc app -s
+docker compose exec backend radon cc app -s
 ```
+
+`backend/tests/` está montado en el contenedor: los tests que se agreguen ahí
+se ejecutan sin reconstruir la imagen. Sin Docker, los mismos comandos se
+ejecutan desde `backend/` sin el prefijo `docker compose exec backend`.
 
 `radon` calcula la complejidad ciclomática V(G) de cada función.
 

@@ -10,7 +10,13 @@ export default function QaAssistant() {
     e.preventDefault()
     setCargando(true)
     const { res, data } = await llamar('/ai/casos', { metodo: 'POST', cuerpo: { requisito } })
-    setRespuesta(res.ok ? data : { aviso: 'El requisito debe tener entre 5 y 500 caracteres.', casos: [] })
+    if (res.ok) {
+      setRespuesta({ ...data, casos: Array.isArray(data.casos) ? data.casos : [] })
+    } else if (res.status === 422) {
+      setRespuesta({ aviso: 'El requisito debe tener entre 5 y 500 caracteres.', casos: [] })
+    } else {
+      setRespuesta({ aviso: 'El asistente no está disponible. Intente nuevamente.', casos: [] })
+    }
     setCargando(false)
   }
 
@@ -38,8 +44,8 @@ export default function QaAssistant() {
                 <tr><th>ID</th><th>Técnica</th><th>Entrada</th><th>Resultado esperado</th></tr>
               </thead>
               <tbody>
-                {respuesta.casos.map((c) => (
-                  <tr key={c.id}>
+                {respuesta.casos.map((c, i) => (
+                  <tr key={i}>
                     <td>{c.id}</td><td>{c.tecnica}</td><td>{c.entrada}</td><td>{c.resultado_esperado}</td>
                   </tr>
                 ))}

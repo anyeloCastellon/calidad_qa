@@ -11,7 +11,7 @@ def validar_rut(rut):
         return False
 
     cuerpo, dv = limpio[:-1], limpio[-1]
-    if not cuerpo.isdigit():
+    if not cuerpo.isdigit() or not 0 < int(cuerpo) < 100_000_000:
         return False
 
     suma = 0

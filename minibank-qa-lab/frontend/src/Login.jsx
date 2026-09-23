@@ -11,7 +11,7 @@ export default function Login({ onLogin }) {
     setError('')
     const { res, data } = await llamar('/login', { metodo: 'POST', cuerpo: { rut, clave } })
     if (!res.ok) {
-      setError(data.detail || 'No fue posible iniciar sesión')
+      setError(data.mensaje || 'No fue posible iniciar sesión')
       return
     }
     console.log('Sesión iniciada', data)

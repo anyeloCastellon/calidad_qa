@@ -92,7 +92,7 @@
 | Defectos críticos antes de producción | ≥ 98 % | | |
 | | | | |
 
-**Casos humanos vs casos IA:**
+**(Opcional) Casos humanos vs casos IA:**
 
 ---
 
@@ -112,7 +112,6 @@
 | RNF01 | | | | | | |
 | RNF02 | | | | | | |
 | RNF03 | | | | | | |
-| RNF04 | | | | | | |
 
 ### 4.2 Defectos encontrados
 

@@ -55,7 +55,7 @@ def generar_casos(requisito):
     try:
         from openai import OpenAI
 
-        cliente = OpenAI(api_key=clave, timeout=30)
+        cliente = OpenAI(api_key=clave, timeout=20, max_retries=1)
         respuesta = cliente.responses.create(
             model=modelo,
             instructions=INSTRUCCIONES,

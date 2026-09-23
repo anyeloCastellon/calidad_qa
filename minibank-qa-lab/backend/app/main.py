@@ -1,13 +1,14 @@
 """API de MiniBank QA Lab."""
 
 import logging
+import re
 import secrets
 from datetime import datetime
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .ai_assistant import generar_casos
 from .rut import normalizar_rut, validar_rut
@@ -19,6 +20,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger("minibank")
 
 app = FastAPI(title="MiniBank QA Lab")
+
+
+@app.exception_handler(HTTPException)
+def error_http(request, exc):
+    return JSONResponse(status_code=exc.status_code, content={"estado": "error", "mensaje": exc.detail})
 
 SALDO_INICIAL = 500_000
 
@@ -48,6 +54,15 @@ class Credenciales(BaseModel):
 class Transferencia(BaseModel):
     destinatario: str
     monto: int
+
+    @field_validator("monto", mode="before")
+    @classmethod
+    def monto_entero(cls, valor):
+        if isinstance(valor, str) and re.fullmatch(r"\s*-?\d+\s*", valor):
+            return int(valor)
+        if isinstance(valor, int) and not isinstance(valor, bool):
+            return valor
+        raise ValueError("El monto debe ser un número entero de pesos")
 
 
 class Requisito(BaseModel):

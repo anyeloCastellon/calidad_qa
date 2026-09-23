@@ -16,6 +16,11 @@ estar justificada por el riesgo.
 
 No se sabe cuántos defectos tiene la aplicación. Puede que ninguno.
 
+> **Trabaje sobre la plantilla desde el minuto 5.** Cada caso y cada hallazgo
+> va directo a la matriz de trazabilidad de
+> [`PLANTILLA_PLAN.md`](PLANTILLA_PLAN.md). Si la llena al final, no le alcanza
+> el tiempo.
+
 ---
 
 ## Requisitos de MiniBank
@@ -26,7 +31,7 @@ parte de aquí.
 | ID | Requisito |
 |---|---|
 | RF01 | El cliente inicia sesión con su RUT y su clave. |
-| RF02 | El cliente puede transferir a cualquier RUT válido (dígito verificador módulo 11). |
+| RF02 | El cliente puede transferir a un RUT válido: cuerpo numérico entre 1 y 99.999.999 y dígito verificador correcto (módulo 11). |
 | RF03 | El monto de una transferencia es un número entero de pesos **mayor a $0**. |
 | RF04 | Cada transferencia cobra una comisión de **$300**. El saldo debe cubrir **monto + comisión**. El saldo nunca puede quedar negativo. |
 | RF05 | El total transferido en el día **no puede superar $1.000.000**. |
@@ -35,164 +40,146 @@ parte de aquí.
 | RNF01 | Las credenciales no se almacenan en texto plano ni aparecen en logs, consola o mensajes de error. |
 | RNF02 | Al cerrar sesión, el token queda invalidado en el servidor. |
 | RNF03 | Ningún secreto (token, clave de API) queda expuesto en el navegador más allá de lo estrictamente necesario. |
-| RNF04 | El asistente de IA solo propone casos: la decisión sobre qué se prueba la toma el QA. |
+
+**Fuera de alcance:** `/api/reset`, `/api/health` y el panel **Asistente de
+QA** son herramientas del laboratorio, no parte de MiniBank.
 
 ---
 
-## Paso 1: Estrategia de pruebas (15 min)
+## Cronograma de la sesión
 
-### 1.1 Caja negra, sin mirar el código (5 min)
+| Min | Bloque |
+|---|---|
+| 0–5 | Contexto y recorrido por la aplicación |
+| 5–15 | Caja negra |
+| 15–25 | Caja blanca y complejidad ciclomática |
+| 25–32 | API e integración |
+| 32–37 | Seguridad y flujo de datos |
+| 37–42 | pytest y cobertura |
+| 42–45 | Matriz, priorización y cierre |
 
-Abra http://localhost:5173, ingrese con `11.111.111-1` / `1234` e intente
-**romper la pantalla de transferencia**.
+---
+
+## 0–5 · Contexto
+
+Abra http://localhost:5173 e ingrese con `11.111.111-1` / `1234`. Recorra la
+pantalla: saldo, límite, comisión, formulario, movimientos. Abra la plantilla.
+
+## 5–15 · Caja negra, sin mirar el código
+
+Intente **romper la pantalla de transferencia**.
 
 ```
 NO ME IMPORTA              ME IMPORTA
 if / for / funciones       entrada → comportamiento → salida
 ```
 
-Diseñe al menos **8 casos** usando partición de equivalencia y valores límite.
-Piense en: monto 0, negativo, vacío, texto, decimal, exactamente el saldo,
-sobre el límite, destinatario inválido. Registre para cada uno la entrada, el
-resultado esperado (según los requisitos) y el resultado observado.
+Diseñe al menos **6 casos** con partición de equivalencia y valores límite.
+Ideas: monto 0, negativo, vacío, texto, decimal, exactamente el saldo, sobre
+el límite, destinatario inválido. Anote entrada, resultado esperado (según los
+requisitos) y resultado observado.
 
-Clasifique cada hallazgo: ¿es un error de **validación de datos**, de **flujo
-de usuario**, de **regla de negocio** o de **usabilidad y consistencia**?
+Clasifique cada hallazgo: error de **validación de datos**, de **flujo de
+usuario**, de **regla de negocio** o de **usabilidad y consistencia**.
 
-### 1.2 Caja blanca, ahora sí con el código (5 min)
+Destinatarios válidos para probar: `12.345.678-5`, `9.876.543-3`,
+`15.555.555-6`. Para volver al estado inicial: `POST /api/reset` (o reinicie el
+backend).
 
-Abra `backend/app/transfer.py` y `backend/app/rut.py`.
+## 15–25 · Caja blanca y V(G)
+
+Abra `backend/app/transfer.py`.
 
 1. Dibuje el grafo de flujo de `validar_transferencia`.
-2. Calcule **V(G) = decisiones + 1** y compárelo con el resultado de
-   `radon cc app -s`.
+2. Calcule **V(G) = decisiones + 1** y compárelo con `radon cc app -s`.
 3. Liste los **caminos independientes** y un dato de prueba para cada uno.
-4. En `validar_rut`, aplique **análisis de bucles**: ¿qué pasa con el `for`
-   con 0, 1, 2 y muchas iteraciones? ¿Cuál es el caso típico?
-5. Aplique **cobertura de decisiones y condiciones**: para cada `if`, ¿qué
-   condición exacta debería tener según los requisitos? ¿Es la que tiene?
-6. Revise los parámetros de cada función. ¿Todos se usan?
+4. **Cobertura de decisiones y condiciones:** para cada `if`, ¿qué condición
+   exacta debería tener según los requisitos? ¿Es la que tiene?
+5. Revise los parámetros de la función. ¿Todos se usan?
 
-Luego ejecute los tests existentes:
+Si le sobra tiempo: `backend/app/rut.py` tiene la función más compleja del
+backend. Aplique **análisis de bucles** al `for` (0, 1 y muchas iteraciones).
 
-```bash
-cd backend
-pytest --cov=app.transfer --cov-branch --cov-report=term-missing
-```
+## 25–32 · API e integración
 
-> Pregunta clave: los tests pasan y la cobertura de ramas es 100 %.
-> ¿Eso significa que `transfer.py` está correcto? Justifique.
+Abra las herramientas de desarrollador (F12), pestañas **Network** y
+**Console**, y repita algunos casos de caja negra.
 
-Agregue a `tests/test_transfer.py` los tests que falten según **los
-requisitos**, no según el código.
-
-### 1.3 Enfoque híbrido: integración React ↔ FastAPI (5 min)
-
-Abra las herramientas de desarrollador del navegador (F12), pestañas
-**Network** y **Console**, y repita algunos casos de caja negra.
-
-- **Comunicación app ↔ backend:** ¿qué cuerpo JSON envía React? ¿Qué espera
-  la API? Compárelo con http://localhost:8000/docs (el contrato).
-- **Manejo de errores en API:** ¿qué código HTTP devuelve el backend para cada
-  error (400, 401, 422)? ¿Qué muestra la pantalla en cada caso? ¿Coinciden?
+- **Contrato:** ¿qué JSON envía React? ¿Qué espera la API? Compárelo con
+  http://localhost:8000/docs.
+- **Manejo de errores:** ¿qué código HTTP devuelve cada error (400, 401, 422)?
+  ¿Qué muestra la pantalla? ¿Coinciden?
 - **Sincronización de estados:** después de cada operación, ¿el saldo en
   pantalla coincide con `GET /api/cuenta`?
-- **Integridad de datos en tránsito:** ¿la app corre sobre HTTP o HTTPS? ¿Qué
-  implicaría eso en producción?
+- **Datos en tránsito:** ¿la app corre sobre HTTP o HTTPS? ¿Qué implicaría en
+  producción?
 
-Pregunta para cada hallazgo: **¿el defecto está en React o en Python?**
+Para cada hallazgo: **¿el defecto está en React o en Python?**
 
----
+## 32–37 · Seguridad y flujo de datos
 
-## Paso 2: Riesgo y seguridad (12 min)
-
-### 2.1 Módulos críticos
-
-MiniBank es pequeña a propósito: ninguna función llega a V(G) > 20. Use
-`radon` para ordenar los módulos por complejidad y argumente:
-
-- ¿Cuáles serían los módulos críticos en una banca real? (transferencias,
-  OTP, cálculo de intereses, límites…)
-- ¿Por qué un módulo con V(G) > 20 exige más profundidad de pruebas, revisión
-  de código, pruebas negativas y de estrés, y prioridad en el cronograma?
-- En MiniBank, ¿la complejidad fue un buen predictor de dónde estaban los
-  defectos? ¿Qué otros factores de riesgo pesan (dinero, seguridad, uso)?
-
-### 2.2 Análisis de flujo de datos
-
-Siga el recorrido de **la clave** y **el token** desde que el usuario los
-escribe hasta que dejan de existir:
+Siga el recorrido de **la clave** y **el token**:
 
 ```
 formulario → fetch → API → comparación → sesión → logs → logout
 ```
 
-Revise el código del backend, **la terminal donde corre el backend** (sus
-logs) y la consola del navegador. Verifique los requisitos RNF01 a RNF03:
-
-- ¿Las credenciales se guardan en texto plano?
-- ¿Hay filtraciones en logs, variables temporales, consola o excepciones?
-- ¿El token se invalida de verdad al cerrar sesión? Pruébelo: copie el token,
-  cierre sesión y úselo con `curl` o Postman contra `GET /api/cuenta`.
+Revise `backend/app/main.py`, los logs del backend (`docker compose logs
+backend` o la terminal donde corre) y la consola del navegador. Verifique
+RNF01 a RNF03. Para RNF02: copie el token, cierre sesión y úselo contra
+`GET /api/cuenta`.
 
 Describa **escenarios de ataque** relevantes (sin hacer pentesting): ¿qué
 podría hacer alguien con acceso a los logs, a un computador compartido o a un
 token robado?
 
+## 37–42 · pytest y cobertura
+
+Con Docker:
+
+```bash
+docker compose exec backend pytest --cov=app.transfer --cov-branch --cov-report=term-missing
+```
+
+Sin Docker, desde `backend/`: `pytest --cov=app.transfer --cov-branch --cov-report=term-missing`.
+
+> Los tests pasan y la cobertura de ramas es 100 %.
+> ¿Eso significa que `transfer.py` está correcto? Justifique.
+
+Agregue a `backend/tests/test_transfer.py` al menos un test que falte según
+**los requisitos**, no según el código, y ejecútelo. Un defecto encontrado
+por caja blanca se demuestra con un **test que falla**.
+
+## 42–45 · Cierre
+
+Complete la **prioridad** (impacto × probabilidad × complejidad) en el
+cronograma basado en riesgos y deje su recomendación de paso a producción.
+
 ---
 
-## Paso 3: Herramientas, métricas e IA (8 min)
+## Entregable
 
-### 3.1 Herramienta de gestión
+[`PLANTILLA_PLAN.md`](PLANTILLA_PLAN.md) contiene todo el plan. **En clase** se
+completan las secciones 1, 2, 4.1, 4.2 y 4.3. Las secciones **3
+(herramientas y métricas)** y **4.4 (protocolo de mantenimiento)** se
+completan según lo que indique el docente.
 
-Elija una (TestRail, Azure Test Plans, Jira + Zephyr, Xray, etc.) y justifique
-cómo mejora la **trazabilidad**, la **reutilización** y el soporte a
-**auditorías y cumplimiento normativo** (piense en la CMF y en PCI DSS).
+Para las métricas, use lo que vio en MiniBank: ¿qué le dice la "cobertura de
+ramas 100 %" sobre la diferencia entre **cobertura de código** y **cobertura
+de requisitos**?
 
-### 3.2 Métricas
+## Extensión opcional: asistente de IA
 
-Defina indicadores con meta numérica: confiabilidad ≥ 95 %, cobertura de
-requisitos ≥ 90 %, defectos críticos detectados antes de producción ≥ 98 %,
-reducción de tiempo por automatización, u otras. Explique por qué importan en
-banca.
-
-> Use MiniBank como evidencia: ¿qué le dice la "cobertura de ramas 100 %" del
-> Paso 1.2 sobre la diferencia entre **cobertura de código** y **cobertura de
-> requisitos**?
-
-### 3.3 Asistente de IA
-
-En el panel **Asistente de QA**, pegue uno de los requisitos (por ejemplo
-RF04) y genere casos. Compare:
-
-| | Mis casos | Casos de la IA |
-|---|---|---|
-| ¿Cuántos? | | |
-| ¿Encontró la IA algo que yo no consideré? | | |
-| ¿Propuso la IA algo incorrecto o inútil? | | |
-| ¿La IA detectó algún defecto real? | | |
+En el panel **Asistente de QA**, pegue un requisito (por ejemplo RF04) y
+genere casos. Compárelos con los suyos: ¿encontró la IA algo que usted no
+consideró? ¿Propuso algo incorrecto? ¿Detectó algún defecto real?
 
 > **La IA propone los casos. El QA los revisa.** Nunca "la IA dijo que
 > funciona, entonces funciona".
 
----
-
-## Entregable (10 min, dentro de los 45)
-
-Complete [`PLANTILLA_PLAN.md`](PLANTILLA_PLAN.md) con:
-
-1. **Matriz de trazabilidad**: requisito → riesgo → caso → técnica →
-   resultado → defecto.
-2. **Cronograma de ejecución basado en riesgos**: prioridad = impacto ×
-   probabilidad × complejidad.
-3. **Protocolo de mantenimiento del plan**: cómo se actualizan los casos ante
-   cambios regulatorios, funcionales o de arquitectura.
-
 ## Reglas
 
 - Cada defecto reportado debe tener **pasos para reproducirlo**. "Lo vi en la
-  línea 23" es una pista, no un reporte: el desarrollador necesita los pasos.
-- Un defecto encontrado solo por caja blanca es válido si lo demuestra con un
-  **test que falla**.
-- No modifique el código de `app/` para "arreglar" la aplicación: su trabajo es
-  encontrar y documentar, no corregir.
+  línea 23" es una pista, no un reporte.
+- No modifique el código de `app/`: su trabajo es encontrar y documentar, no
+  corregir. Solo puede agregar tests en `tests/`.
