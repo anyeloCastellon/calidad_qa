@@ -1,0 +1,113 @@
+:root {
+  --fondo: #eef2f7;
+  --tarjeta: #ffffff;
+  --texto: #1c2533;
+  --suave: #5b6778;
+  --marca: #0b5cad;
+  --ok: #1a7f37;
+  --error: #c62828;
+  --aviso: #9a6700;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+.pagina {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px;
+}
+
+.telefono {
+  width: 100%;
+  max-width: 380px;
+  background: var(--fondo);
+  border: 10px solid #1c2533;
+  border-radius: 32px;
+  padding: 16px;
+  min-height: 640px;
+}
+
+.telefono header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  color: var(--marca);
+  margin-bottom: 12px;
+}
+
+.saldo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--marca);
+  color: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.saldo .monto { font-size: 2rem; font-weight: 700; }
+.saldo .nota { color: #d6e6f7; }
+
+.tarjeta {
+  background: var(--tarjeta);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tarjeta h2 { margin: 0; font-size: 1.05rem; }
+
+.asistente { width: 100%; max-width: 640px; }
+
+label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--suave); }
+input, textarea {
+  font: inherit;
+  padding: 10px;
+  border: 1px solid #c8d1dc;
+  border-radius: 8px;
+  color: var(--texto);
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--marca);
+  color: #fff;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.6; cursor: wait; }
+button.secundario { background: transparent; color: var(--marca); padding: 4px 8px; }
+
+.aviso { margin: 0; font-weight: 600; }
+.aviso.ok { color: var(--ok); }
+.aviso.error { color: var(--error); }
+.aviso.alerta { color: var(--aviso); }
+
+.nota { margin: 0; font-size: 0.85rem; color: var(--suave); }
+
+.movimientos { list-style: none; margin: 0; padding: 0; }
+.movimientos li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e3e8ef;
+  font-size: 0.9rem;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { text-align: left; padding: 6px; border-bottom: 1px solid #e3e8ef; vertical-align: top; }
+th { color: var(--suave); }

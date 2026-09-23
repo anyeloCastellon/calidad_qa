@@ -1,0 +1,8 @@
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+python-dotenv==1.0.*
+openai>=1.60
+pytest==8.*
+pytest-cov==6.*
+httpx==0.28.*
+radon==6.*

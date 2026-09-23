@@ -29,6 +29,20 @@ Material para los equipos en [`qa-shop-lab/student/`](qa-shop-lab/student):
 
 La especificación de requisitos a verificar se entrega durante la clase.
 
+### `minibank-qa-lab/` — Plan de pruebas estratégico (Actividad 2.1.2)
+
+Mini banca móvil (React + FastAPI) sobre la que cada estudiante diseña y
+aplica un plan de pruebas: caja negra, caja blanca con complejidad ciclomática,
+integración, análisis de flujo de datos, `pytest` y un asistente de QA con IA.
+
+```bash
+cd minibank-qa-lab
+docker compose up --build
+```
+
+Aplicación en http://localhost:5173 — ver [minibank-qa-lab/README.md](minibank-qa-lab/README.md).
+Guía en [`minibank-qa-lab/student/GUIA_ESTUDIANTE.md`](minibank-qa-lab/student/GUIA_ESTUDIANTE.md).
+
 ## Stack
 
 Python 3.12 · Flask · SQLite · Gunicorn · Docker Compose · Postman · Locust

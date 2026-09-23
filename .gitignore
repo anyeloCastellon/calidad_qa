@@ -14,3 +14,6 @@ venv/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Material docente de MiniBank: NO se publica.
+minibank-qa-lab/teacher/
