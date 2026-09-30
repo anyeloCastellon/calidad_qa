@@ -16,7 +16,7 @@ Este documento define el comportamiento esperado. Compárelo con lo observado.
 | RNF01 | No registrar claves en logs ni devolverlas en respuestas. |
 | RNF02 | Logout invalida el token de esa sesión; su reutilización debe responder 401. |
 | RNF03 | No exponer token en consola ni persistirlo en almacenamiento del navegador. |
-| RNF04 | Cuenta, movimientos, destinatarios y operaciones requieren sesión válida. Token ausente, inválido o invalidado debe producir 401 y no entregar datos ni modificar el estado. |
+| RNF04 | Las operaciones bancarias de cuenta, movimientos, destinatarios y transferencias requieren sesión válida. Token ausente, inválido o invalidado debe producir 401 y no entregar datos ni modificar el estado. Los endpoints de laboratorio `/api/health` y `/api/reset` están fuera del alcance de este requisito. |
 | RNF05 | En 320×568, 375×667 y 390×844: sin desplazamiento horizontal ni superposiciones. Botones visibles al desplazarse verticalmente y utilizables; campos y mensajes legibles. |
 
 ## Estado inicial

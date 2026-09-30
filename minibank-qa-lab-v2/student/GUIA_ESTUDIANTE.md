@@ -56,7 +56,7 @@ DevTools → modo dispositivo: pruebe 320×568, 375×667 y 390×844. Examine for
 
 ## Misión final — Demuestre sus hallazgos (35–45 min)
 
-35–42 min: complete la matriz y un reporte por defecto encontrado. Relacione cada reporte con el caso y requisito. Una falla reproducible debe incluir esperado, observado y evidencia.
+35–42 min: complete la matriz, registre todos los FAIL y documente en `REPORTE_DEFECTO.md` **al menos dos defectos reproducibles de distinta categoría**. Relacione cada reporte con el caso y requisito e incluya esperado, observado y evidencia. Los demás hallazgos pueden quedar identificados con su ID de defecto en la matriz, sin exigir un reporte completo por cada FAIL.
 
 Pregunte: **¿Existe algún requisito sin al menos un caso?** Indique los requisitos pendientes; con 8–10 casos puede quedar cobertura incompleta. No invente ejecuciones para completar la matriz.
 
