@@ -1,0 +1,17 @@
+name: minibank-qa-lab-v2
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8001}:8000"
+    volumes:
+      - ./backend/tests:/srv/tests
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5174}:5173"
+    environment:
+      API_URL: http://backend:8000
+    depends_on:
+      - backend
+

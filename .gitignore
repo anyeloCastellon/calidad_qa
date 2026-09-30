@@ -17,3 +17,7 @@ Thumbs.db
 
 # Material docente de MiniBank: NO se publica.
 minibank-qa-lab/teacher/
+
+minibank-qa-lab-v2/teacher/
+minibank-qa-lab-v2/backend/.pytest_cache/
+minibank-qa-lab-v2/backend/.coverage
