@@ -21,3 +21,13 @@ minibank-qa-lab/teacher/
 minibank-qa-lab-v2/teacher/
 minibank-qa-lab-v2/backend/.pytest_cache/
 minibank-qa-lab-v2/backend/.coverage
+
+# Material docente, datos y evidencia generada de MiniBank 3.0.
+minibank-qa-lab-v3/teacher/
+minibank-qa-lab-v3/backend/data/*
+!minibank-qa-lab-v3/backend/data/.gitkeep
+minibank-qa-lab-v3/**/*.db
+minibank-qa-lab-v3/**/*.db-*
+minibank-qa-lab-v3/**/*.log
+minibank-qa-lab-v3/student/evidencias/*
+!minibank-qa-lab-v3/student/evidencias/.gitkeep

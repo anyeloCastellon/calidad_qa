@@ -1,0 +1,26 @@
+name: minibank-qa-lab-v3
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8002}:8000"
+    volumes:
+      - ./backend/data:/srv/data
+      - ./backend/tests:/srv/tests:ro
+    environment:
+      MINIBANK_DB_PATH: /srv/data/minibank_v3.db
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/lab/status', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 10s
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5175}:5173"
+    environment:
+      API_URL: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
