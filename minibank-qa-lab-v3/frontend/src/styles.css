@@ -14,7 +14,7 @@ body { margin: 0; }
 .tarjeta { min-width: 0; background: white; border: 1px solid #dce4ee; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
 h2 { font-size: 1.1rem; margin: 0; }
 label { display: flex; flex-direction: column; gap: 6px; color: #40536a; font-size: .9rem; }
-input { width: 100%; min-width: 0; font: inherit; padding: 12px; border: 1px solid #b8c8d8; border-radius: 8px; }
+input, select { width: 100%; min-width: 0; font: inherit; padding: 12px; border: 1px solid #b8c8d8; border-radius: 8px; }
 button { min-height: 44px; font: inherit; font-weight: 600; cursor: pointer; border: 0; border-radius: 8px; padding: 12px 16px; background: #0756a5; color: white; }
 button.secundario { color: #0756a5; background: #dceaf8; }
 button:disabled { opacity: .6; cursor: wait; }
@@ -30,4 +30,10 @@ ul { list-style: none; padding: 0; margin: 0; }
 .destinatarios li { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid #dce4ee; overflow-wrap: anywhere; }
 .destinatarios span { color: #52647a; font-size: .85rem; }
 footer { margin-top: 16px; }
+.formulario-documentos { display: flex; flex-direction: column; gap: 14px; }
+.datos-documento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.datos-documento > div { min-width: 0; }
+.datos-documento dt { color: #52647a; font-size: .85rem; }
+.datos-documento dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+@media (max-width: 400px) { .datos-documento { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .columnas { grid-template-columns: minmax(0,1fr); } .pagina { padding: 16px 12px; } .tarjeta { padding: 16px; } .saldo { padding: 20px; } }

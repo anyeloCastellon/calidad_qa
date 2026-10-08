@@ -1,6 +1,6 @@
 # Requisitos de MiniBank 3.0
 
-Build evaluada: **3.0.0-rc1**. Estos requisitos definen el esperado; registre lo obtenido al ejecutar sus casos anteriores.
+Build evaluada: **3.0.0-sast-lab**. Estos requisitos definen el esperado; registre lo obtenido al ejecutar sus casos anteriores.
 
 | ID | Comportamiento esperado |
 |---|---|

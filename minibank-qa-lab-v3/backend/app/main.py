@@ -17,6 +17,7 @@ from pydantic import BaseModel, StrictInt, StrictStr
 from . import db
 from .rut import normalizar_rut, validar_rut
 from .transfer import COMISION, LIMITE_DIARIO, MAXIMO_TRANSFERENCIA, MENSAJES, validar_transferencia
+from .security_lab import create_security_router
 
 logger = logging.getLogger("minibank.lab")
 if not logger.handlers:
@@ -217,3 +218,6 @@ def reset(perfil: str = "estandar"):
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     return {"estado": "ok", "mensaje": "Datos reiniciados; vuelva a iniciar sesión", "perfil": perfil}
+
+
+app.include_router(create_security_router(usuario_actual))

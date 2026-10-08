@@ -1,6 +1,6 @@
 # MiniBank QA Lab 3.0
 
-Laboratorio local para la **Actividad 2.3.2 — Ejecución de pruebas en un entorno de laboratorio**. Evalúe la build candidata **3.0.0-rc1** utilizando los casos diseñados en la actividad anterior: prepare el entorno, ejecute Smoke y casos, conserve evidencia y emita una recomendación de liberación.
+Laboratorio local para la **Actividad 2.3.2 — Ejecución de pruebas en un entorno de laboratorio**. Evalúe la build **3.0.0-sast-lab** utilizando los casos diseñados en la actividad anterior: prepare el entorno, ejecute Smoke y casos, conserve evidencia y emita una recomendación de liberación. Esta build es también el punto de partida del análisis SonarQube y las correcciones posteriores.
 
 Tecnologías: React, FastAPI, SQLite y Docker Compose. Esta carpeta es independiente de MiniBank 1.0 y 2.0 y utiliza puertos diferentes.
 
@@ -76,7 +76,7 @@ Tests locales, desde `backend`:
 
 SQLite se genera en `backend/data/minibank_v3.db`, con tablas `users`, `accounts`, `sessions`, `recipients` y `movements`. El primer arranque crea el esquema y carga el dataset; los posteriores conservan los datos bancarios. El arranque invalida las sesiones existentes: vuelva a ingresar. Reiniciar el backend conserva operaciones y acumulado; para iniciar una nueva jornada utilice reset.
 
-`/api/lab/status` verifica el acceso real a la DB, las tablas y el dataset base. El estado esperado es `ready`, build `3.0.0-rc1`, database `sqlite`, schema `ready` y seed `loaded`.
+`/api/lab/status` verifica el acceso real a la DB, las tablas y el dataset base. El estado esperado es `ready`, build `3.0.0-sast-lab`, database `sqlite`, schema `ready` y seed `loaded`.
 
 ## Reset del laboratorio
 
@@ -126,3 +126,11 @@ En Swagger, obtenga el token mediante login y use **Authorize** con el token sin
 - [Informe resumen](student/INFORME_RESUMEN.md)
 
 Conserve los casos y resultados históricos de 2.0 y registre la nueva ejecución por build. Guarde sus evidencias localmente; la carpeta pública `student/evidencias/` contiene únicamente `.gitkeep`.
+
+## Análisis SonarQube y ciclos 3.1/3.2
+
+La [guía de SonarQube](student/GUIA_SONARQUBE.md) describe cómo analizar V3 con Sonar way, registrar el punto de partida y comprobar las correcciones de los ciclos 3.1 y 3.2. Ejecute `pysonar` desde esta carpeta con el token en `SONAR_TOKEN`; conserve la misma clave de proyecto y alcance entre análisis.
+
+Use opciones largas en PowerShell, por ejemplo `--sonar-project-version=3.0.0-sast-lab`. Para las correcciones, mantenga la carpeta V3 y sincronice las builds `3.1.0` / `3.2.0` en backend, paquete/lockfile del frontend, etiquetas de UI y `sonar.projectVersion`, siguiendo la guía. Verifique la build realmente ejecutada antes de cada reanálisis.
+
+Registre los hallazgos reales del servidor y examine seguridad en **Overall Code**, además de New Code. Conserve la revisión inicial de 3.0 y sus evidencias antes de corregir; el laboratorio utiliza datos ficticios y servicios locales en `127.0.0.1`. Los criterios de cierre incluyen reanálisis y pruebas de comportamiento: un Quality Gate verde por sí solo no demuestra seguridad total.

@@ -3,7 +3,7 @@
 
 **Actividad 2.3.2 — Ejecución de pruebas en un entorno de laboratorio. Trabajo individual: 45 minutos.**
 
-En la actividad anterior diseñó los casos. Hoy no debe rediseñarlos: debe ejecutarlos exactamente como fueron definidos sobre la nueva build candidata **3.0.0-rc1** y recomendar si puede liberarse.
+En la actividad anterior diseñó los casos. Hoy no debe rediseñarlos: debe ejecutarlos exactamente como fueron definidos sobre la build **3.0.0-sast-lab** y recomendar si puede liberarse. Para la actividad de análisis estático y corrección, utilice `GUIA_SONARQUBE.md`.
 
 **Preparación → Smoke → Ejecución → Evidencia → Defectos → Decisión**
 

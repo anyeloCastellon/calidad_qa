@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { llamar, pesos } from './api.js'
 import Login from './Login.jsx'
+import Documentos, { esVistaDocumento } from './Documentos.jsx'
 
 const TOKEN_KEY = 'minibank-v3-token'
 
@@ -85,8 +86,15 @@ export default function App() {
     limpiarSesion()
   }
 
+  if (token && cuenta && esVistaDocumento()) {
+    return <main className="pagina">
+      <header className="cabecera"><div><strong>MiniBank <span>3.0.0-sast-lab</span></strong><p className="nota">Documentos de la cuenta</p></div></header>
+      <Documentos token={token} sesionInvalida={sesionInvalida} />
+    </main>
+  }
+
   return <main className="pagina">
-    <header className="cabecera"><div><strong>MiniBank <span>3.0.0-rc1</span></strong><p className="nota">QA Lab · Operación: ¿liberamos esta versión?</p></div>
+    <header className="cabecera"><div><strong>MiniBank <span>3.0.0-sast-lab</span></strong><p className="nota">QA Lab · Operación: ¿liberamos esta versión?</p></div>
       {token && <button className="secundario" onClick={salir}>Salir</button>}</header>
     {error && <p role="alert" className="aviso error">{error}</p>}
     {!token && <Login onLogin={iniciarSesion} onUnauthorized={() => limpiarSesion()} />}
@@ -112,8 +120,9 @@ export default function App() {
           </section>
         </div>
       </div>
+      <Documentos token={token} sesionInvalida={sesionInvalida} />
     </>}
-    <footer className="nota">Build 3.0.0-rc1 · Datos de práctica persistentes en SQLite. Consulte los requisitos y registre evidencia de cada caso.</footer>
+    <footer className="nota">Build 3.0.0-sast-lab · Datos de práctica persistentes en SQLite. Consulte los requisitos y registre evidencia de cada caso.</footer>
   </main>
 }
 

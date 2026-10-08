@@ -31,3 +31,9 @@ minibank-qa-lab-v3/**/*.db-*
 minibank-qa-lab-v3/**/*.log
 minibank-qa-lab-v3/student/evidencias/*
 !minibank-qa-lab-v3/student/evidencias/.gitkeep
+
+# Resultados y entornos locales del análisis estático de V3.
+minibank-qa-lab-v3/.scannerwork/
+minibank-qa-lab-v3/.sonar/
+minibank-qa-lab-v3/.venv-sonar/
+minibank-qa-lab-v3/backend/.pytest_cache/

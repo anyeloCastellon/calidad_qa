@@ -1,10 +1,10 @@
 # Smoke Test — Gate de ejecución
 
-Build candidata: **3.0.0-rc1**. Ejecute en orden y registre obtenido, estado y evidencia. Los resultados se completan al ejecutar.
+Build evaluada: **3.0.0-sast-lab**. Ejecute en orden y registre obtenido, estado y evidencia. Los resultados se completan al ejecutar.
 
 | ID | Validación / pasos | Resultado esperado | Obtenido | Estado | Evidencia |
 |---|---|---|---|---|---|
-| SMK-001 | Consultar `GET http://localhost:8002/api/lab/status`. | HTTP 200; status `ready`; build `3.0.0-rc1`; SQLite, schema `ready`, seed `loaded`. | | | |
+| SMK-001 | Consultar `GET http://localhost:8002/api/lab/status`. | HTTP 200; status `ready`; build `3.0.0-sast-lab`; SQLite, schema `ready`, seed `loaded`. | | | |
 | SMK-002 | Abrir http://localhost:5175; ingresar RUT `11.111.111-1`, clave `1234` y presionar Ingresar. | Login aceptado; se ingresa a MiniBank. | | | |
 | SMK-003 | Después del login, observar Home y los datos de cuenta. | Home carga; cliente Camila Rojas y datos de cuenta visibles según el perfil preparado. | | | |
 

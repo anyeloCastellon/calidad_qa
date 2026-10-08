@@ -7,7 +7,7 @@ Duplique este bloque por **defecto único**. Cada caso FAIL debe vincularse a un
 | ID | BUG-___ |
 | Caso relacionado | |
 | Requisito | |
-| Build | 3.0.0-rc1 |
+| Build | 3.0.0-sast-lab |
 | Severidad | Crítica / Mayor / Menor / Cosmética |
 | Entorno | |
 | Precondición | |
