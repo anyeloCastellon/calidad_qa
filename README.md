@@ -43,9 +43,27 @@ docker compose up --build
 Aplicación en http://localhost:5173 — ver [minibank-qa-lab/README.md](minibank-qa-lab/README.md).
 Guía en [`minibank-qa-lab/student/GUIA_ESTUDIANTE.md`](minibank-qa-lab/student/GUIA_ESTUDIANTE.md).
 
+### `atlas-qa-lab/` — Sistema de Gestión Atlas
+
+Aplicación de empresas, usuarios, clientes, contratos y documentos basada en el
+ERS de Atlas. Utiliza React, Express y PostgreSQL, con datos ficticios, roles y
+varias empresas. Es el software a utilizar en el encargo de evaluación; el plan,
+los casos de prueba, los hallazgos y las conclusiones los elabora cada equipo.
+
+```powershell
+cd atlas-qa-lab
+./ops/setup.ps1
+docker compose up --build -d --wait
+```
+
+Aplicación en http://localhost:5180. Consulte el [arranque local](atlas-qa-lab/README.md)
+y el [manual de uso](atlas-qa-lab/student/MANUAL_USUARIO.md).
+
 ## Stack
 
-Python 3.12 · Flask · SQLite · Gunicorn · Docker Compose · Postman · Locust
+Los laboratorios utilizan Python, Flask/FastAPI, Node.js, React, Express,
+SQLite/PostgreSQL y Docker Compose. Las herramientas de evaluación incluyen
+Postman, Locust y análisis estático, según la actividad.
 
 ## Nota
 

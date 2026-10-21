@@ -37,3 +37,18 @@ minibank-qa-lab-v3/.scannerwork/
 minibank-qa-lab-v3/.sonar/
 minibank-qa-lab-v3/.venv-sonar/
 minibank-qa-lab-v3/backend/.pytest_cache/
+
+# Atlas: material docente y artefactos locales de evaluación.
+atlas-qa-lab/teacher/
+atlas-qa-lab/.env
+atlas-qa-lab/.env.*
+!atlas-qa-lab/.env.example
+atlas-qa-lab/**/node_modules/
+atlas-qa-lab/**/dist/
+atlas-qa-lab/.scannerwork/
+atlas-qa-lab/.sonar/
+atlas-qa-lab/certs-local/
+atlas-qa-lab/backups/
+atlas-qa-lab/**/*.log
+atlas-qa-lab/student/evidencias/*
+!atlas-qa-lab/student/evidencias/.gitkeep

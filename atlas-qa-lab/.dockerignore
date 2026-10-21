@@ -1,0 +1,11 @@
+teacher
+backups
+certs-local
+.env
+.env.*
+**/node_modules
+**/dist
+.scannerwork
+.sonar
+**/*.log
+.git
