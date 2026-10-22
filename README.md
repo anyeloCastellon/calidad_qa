@@ -48,6 +48,11 @@ Guía en [`minibank-qa-lab/student/GUIA_ESTUDIANTE.md`](minibank-qa-lab/student/
 Aplicación en http://localhost:5180. Instrucciones de
 [arranque con Docker](atlas-qa-lab/README.md).
 
+### `cuidarte-qa-lab/` — Cuidarte+
+
+Aplicación en http://localhost:5181. Instrucciones de
+[arranque con Docker](cuidarte-qa-lab/README.md).
+
 ## Stack
 
 Los laboratorios utilizan Python, Flask/FastAPI, Node.js, React, Express,
