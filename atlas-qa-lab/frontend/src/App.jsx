@@ -65,7 +65,6 @@ export default function App() {
         {section === 'Usuarios' && <Team companyId={company.id} admin={admin} notify={notify} refreshMemberships={refreshMemberships}/>}
         {section === 'Auditoría' && <Audit companyId={company.id}/>}
       </div>}
-      <details className="operational-help"><summary>Ayuda para usar Atlas</summary><p>Seleccione una empresa en el menú. En Clientes, abra un cliente para consultar sus contratos y luego los documentos de cada contrato. En Usuarios puede consultar quiénes integran su empresa.</p><p>Las personas con rol administrador pueden agregar y modificar información. El rol editor permite consultar y descargar. Para confirmar una cuenta o aceptar una invitación, abra el enlace recibido por correo.</p></details>
     </main>
     {creatingCompany && <FormModal title="Crear empresa" fields={companyFields} onClose={() => setCreatingCompany(false)} submitLabel="Crear empresa" onSubmit={async values => {
       const result = await request('/empresas', { method: 'POST', body: values }); await refreshMemberships(); setCompanyId(result.data.id); go('Resumen'); notify('Empresa creada. Ya puede agregar clientes y miembros.')
@@ -80,7 +79,7 @@ function Dashboard({ companyId, onClients }) {
   return <><PageHeading eyebrow="SU EMPRESA, EN UN VISTAZO" title="Resumen" description="La información esencial para empezar el día." action={<Button variant="contained" onClick={onClients}>Ver clientes</Button>}/>
     <ErrorNotice error={resource.error}/>{resource.loading ? <Loading/> : data && <>
       <div className="metrics">{[['Clientes', data.clientes], ['Contratos', data.contratos], ['Documentos', data.documentos], ['Usuarios', data.usuarios]].map(([label, count]) => <div className="metric" key={label}><span>{label}</span><strong>{count ?? 0}</strong><small>En esta empresa</small></div>)}</div>
-      <section className="panel"><div className="section-heading"><Typography component="h2" variant="h5">Estado de los contratos</Typography><Chip label="Actualizado al consultar" variant="outlined"/></div><div className="status-summary">{[['activo', 'Activos'], ['vence', 'Vencen pronto'], ['expirado', 'Expirados'], ['programado', 'Programados']].map(([key, label]) => <div key={key}><span className={`status-dot ${key}`}/><span>{label}</span><strong>{data.estados?.[key] || 0}</strong></div>)}</div><p className="muted">Abra un cliente para revisar sus contratos, fechas y documentos asociados.</p></section>
+      <section className="panel"><div className="section-heading"><Typography component="h2" variant="h5">Estado de los contratos</Typography><Chip label="Actualizado al consultar" variant="outlined"/></div><div className="status-summary">{[['activo', 'Activos'], ['vence', 'Vencen pronto'], ['expirado', 'Expirados'], ['programado', 'Programados']].map(([key, label]) => <div key={key}><span className={`status-dot ${key}`}/><span>{label}</span><strong>{data.estados?.[key] || 0}</strong></div>)}</div></section>
     </>}
   </>
 }
