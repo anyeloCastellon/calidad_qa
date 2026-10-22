@@ -45,19 +45,8 @@ Guía en [`minibank-qa-lab/student/GUIA_ESTUDIANTE.md`](minibank-qa-lab/student/
 
 ### `atlas-qa-lab/` — Sistema de Gestión Atlas
 
-Aplicación de empresas, usuarios, clientes, contratos y documentos basada en el
-ERS de Atlas. Utiliza React, Express y PostgreSQL, con datos ficticios, roles y
-varias empresas. Es el software a utilizar en el encargo de evaluación; el plan,
-los casos de prueba, los hallazgos y las conclusiones los elabora cada equipo.
-
-```powershell
-cd atlas-qa-lab
-./ops/setup.ps1
-docker compose up --build -d --wait
-```
-
-Aplicación en http://localhost:5180. Consulte el [arranque local](atlas-qa-lab/README.md)
-y el [manual de uso](atlas-qa-lab/student/MANUAL_USUARIO.md).
+Aplicación en http://localhost:5180. Instrucciones de
+[arranque con Docker](atlas-qa-lab/README.md).
 
 ## Stack
 

@@ -8,8 +8,7 @@
     "start": "node src/server.js",
     "lab:reset": "node scripts/reset.js",
     "lab:invalidate": "node scripts/invalidate.js",
-    "db:init": "node scripts/init.js",
-    "test": "node --test tests/smoke.test.js"
+    "db:init": "node scripts/init.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",
