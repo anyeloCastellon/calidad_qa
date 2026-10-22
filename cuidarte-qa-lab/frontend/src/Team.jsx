@@ -1,0 +1,20 @@
+import { useState } from 'react'
+import { Button, Chip, MenuItem, TextField, Typography } from '@mui/material'
+import { request } from './api.js'
+import { ConfirmModal, Empty, ErrorNotice, FormModal, Loading, PageHeading, Pagination, dateLabel, useResource } from './ui.jsx'
+
+const roles = [{ value: 'administrador', label: 'Administrador' }, { value: 'medico', label: 'Médico' }, { value: 'paciente', label: 'Paciente' }]
+const fields = [{ name: 'nombre_usuario', label: 'Nombre de usuario', required: true, maxLength: 32 }, { name: 'email', label: 'Correo electrónico', type: 'email', required: true }, { name: 'rol', label: 'Rol', required: true, options: roles, default: 'paciente' }]
+export function Users({ onNotice }) {
+  const [page, setPage] = useState(1), [modal, setModal] = useState(null), [remove, setRemove] = useState(null)
+  const resource = useResource(() => request(`/usuarios?page=${page}`), [page])
+  return <><PageHeading title="Usuarios" action={<Button variant="contained" onClick={() => setModal({})}>Crear usuario</Button>}/><ErrorNotice error={resource.error}/>{resource.loading ? <Loading/> : resource.value && <><div className="record-list">{resource.value.data.map(user => <article className="record-row" key={user.id}><div className="record-main"><Typography component="h2" variant="h5">{user.nombre_usuario}</Typography><p>{user.email}</p><Chip label={roles.find(role => role.value === user.rol)?.label}/>{!user.activo && <Chip label="Inactivo" color="warning"/>}</div><div className="record-actions"><Button variant="outlined" onClick={() => setModal(user)}>Editar usuario</Button><Button color="error" onClick={() => setRemove(user)}>Eliminar usuario</Button></div></article>)}</div><Pagination meta={resource.value.meta} page={page} onChange={setPage}/></>}
+    {modal && <FormModal title={modal.id ? 'Editar usuario' : 'Crear usuario'} initial={{ ...modal, activo: String(modal.activo) }} fields={[...fields, ...(modal.id ? [{ name: 'activo', label: 'Estado', options: [{ value: 'true', label: 'Activo' }, { value: 'false', label: 'Inactivo' }] }] : [{ name: 'password', label: 'Contraseña', type: 'password', required: true, autoComplete: 'new-password', help: '12 caracteres como mínimo; mayúscula, minúscula, número y símbolo.' }])]} onClose={() => setModal(null)} onSubmit={async values => { const body = modal.id ? { ...values, activo: values.activo === 'true' } : values; await request(`/usuarios${modal.id ? `/${modal.id}` : ''}`, { method: modal.id ? 'PATCH' : 'POST', body }); resource.reload(); onNotice('Usuario guardado') }}/ >}
+    {remove && <ConfirmModal title="Eliminar usuario" text={`¿Confirma que desea eliminar a ${remove.nombre_usuario}?`} label="Eliminar" onClose={() => setRemove(null)} onConfirm={async () => { await request(`/usuarios/${remove.id}`, { method: 'DELETE', body: { confirmacion: true } }); resource.reload(); onNotice('Usuario eliminado') }}/ >}
+  </>
+}
+export function Audit() {
+  const [page, setPage] = useState(1), [filter, setFilter] = useState('')
+  const resource = useResource(() => request(`/auditoria?page=${page}&recurso=${filter}`), [page, filter])
+  return <><PageHeading title="Auditoría"/><div className="filters"><TextField label="Recurso" select value={filter} onChange={e => { setFilter(e.target.value); setPage(1) }}><MenuItem value="">Todos</MenuItem>{['paciente', 'examen', 'documento', 'usuario'].map(value => <MenuItem key={value} value={value}>{value}</MenuItem>)}</TextField></div><ErrorNotice error={resource.error}/>{resource.loading ? <Loading/> : resource.value && <><div className="record-list">{resource.value.data.map(event => <article className="audit-row" key={event.id}><div><strong>{event.accion} · {event.recurso}</strong><p>{event.actor || 'Sistema'}</p></div><div><span>{dateLabel(event.created_at)} · {new Date(event.created_at).toLocaleTimeString('es-CL')}</span><p className="muted">{event.recurso_id}</p></div></article>)}{!resource.value.data.length && <Empty title="Sin eventos">No hay eventos para mostrar.</Empty>}</div><Pagination meta={resource.value.meta} page={page} onChange={setPage}/></>}</>
+}

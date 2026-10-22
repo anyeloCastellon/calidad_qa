@@ -1,0 +1,111 @@
+name: cuidarte-qa-lab
+services:
+  certificates:
+    build: ./ops/certificates
+    volumes:
+      - certificates:/certs
+    restart: "no"
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: cuidarte
+      POSTGRES_USER: cuidarte
+      POSTGRES_PASSWORD: ${PGPASSWORD:?Ejecute ops/setup primero}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    command: [postgres, -c, ssl=on, -c, ssl_cert_file=/certs/db.crt, -c, ssl_key_file=/certs/db.key, -c, hba_file=/etc/postgresql/pg_hba.conf]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - certificates:/certs:ro
+      - ./ops/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    depends_on:
+      certificates:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U cuidarte -d cuidarte]
+      interval: 3s
+      timeout: 4s
+      retries: 30
+    restart: unless-stopped
+  mail:
+    image: axllent/mailpit:v1.31.6
+    user: "0:0"
+    environment:
+      MP_SMTP_TLS_CERT: /certs/mail.crt
+      MP_SMTP_TLS_KEY: /certs/mail.key
+      MP_SMTP_REQUIRE_STARTTLS: "true"
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 200
+    ports:
+      - "127.0.0.1:${MAIL_PORT:-8027}:8025"
+    volumes:
+      - certificates:/certs:ro
+      - maildata:/data
+    depends_on:
+      certificates:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  backend:
+    build: ./backend
+    environment:
+      NODE_ENV: production
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: cuidarte
+      PGDATABASE: cuidarte
+      PGPASSWORD: ${PGPASSWORD:?Ejecute ops/setup primero}
+      PGSSLMODE: require
+      PGSSLROOTCERT: /certs/ca.crt
+      JWT_SECRET: ${JWT_SECRET:?Ejecute ops/setup primero}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Ejecute ops/setup primero}
+      TLS_CERT: /certs/backend.crt
+      TLS_KEY: /certs/backend.key
+      PORT: 3443
+      LAB_LOCAL_HTTP: "true"
+      PUBLIC_URL: http://localhost:${APP_PORT:-5181}
+      ALLOWED_ORIGINS: http://localhost:${APP_PORT:-5181},http://127.0.0.1:${APP_PORT:-5181}
+      STORAGE_DIR: /srv/storage
+      PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-12}
+      SEED_REFERENCE_DATE: ${SEED_REFERENCE_DATE:-}
+      SMTP_HOST: mail
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_REQUIRE_TLS: "true"
+      SMTP_CA: /certs/ca.crt
+      SMTP_SERVERNAME: mail
+      SMTP_FROM: Cuidarte+ <no-reply@cuidarte.example>
+    volumes:
+      - certificates:/certs:ro
+      - storage:/srv/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      mail:
+        condition: service_started
+    healthcheck:
+      test: [CMD, node, -e, "require('https').get('https://backend:3443/api/lab/status',{ca:require('fs').readFileSync('/certs/ca.crt')},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    restart: unless-stopped
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "127.0.0.1:${APP_PORT:-5181}:80"
+    volumes:
+      - certificates:/certs:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  certificates:
+  pgdata:
+  storage:
+  maildata:
+  caddydata:
+  caddyconfig:
