@@ -53,6 +53,11 @@ Aplicación en http://localhost:5180. Instrucciones de
 Aplicación en http://localhost:5181. Instrucciones de
 [arranque con Docker](cuidarte-qa-lab/README.md).
 
+### `wordpress-security-lab/` — Pruebas de seguridad (Actividad 3.1.2)
+
+Campus Abierto en http://localhost:8088. Incluye una clase guiada de 60 minutos
+y un desafío individual de 30 minutos. [Preparación y material](wordpress-security-lab/README.md).
+
 ## Stack
 
 Los laboratorios utilizan Python, Flask/FastAPI, Node.js, React, Express,

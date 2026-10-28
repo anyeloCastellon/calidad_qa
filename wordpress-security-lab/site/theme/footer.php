@@ -1,0 +1,1 @@
+</main><footer class="site-footer"><div>Campus Abierto · Entorno local de práctica · Datos ficticios</div><div class="footer-links"><a href="<?php echo esc_url(home_url('/biblioteca/')); ?>">Biblioteca</a><a href="<?php echo esc_url(home_url('/muro/')); ?>">Comunidad</a></div></footer><?php wp_footer(); ?></body></html>

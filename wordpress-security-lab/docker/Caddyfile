@@ -1,0 +1,10 @@
+{
+    auto_https off
+}
+:80 {
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy same-origin
+    }
+    reverse_proxy wordpress:80
+}

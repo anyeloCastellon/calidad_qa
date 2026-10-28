@@ -65,3 +65,12 @@ cuidarte-qa-lab/.sonar/
 cuidarte-qa-lab/certs-local/
 cuidarte-qa-lab/backups/
 cuidarte-qa-lab/**/*.log
+
+# WordPress 3.1.2: claves, evidencia y material de uso docente.
+wordpress-security-lab/.env
+wordpress-security-lab/teacher/
+wordpress-security-lab/student/evidencias/*
+!wordpress-security-lab/student/evidencias/.gitkeep
+wordpress-security-lab/**/*.log
+wordpress-security-lab/site/wordpress/wp-config.php
+wordpress-security-lab/site/wordpress/wp-content/uploads/

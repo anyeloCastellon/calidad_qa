@@ -1,0 +1,2 @@
+FROM wpscanteam/wpscan@sha256:ae7685d5d6cbd86956ba4cb45b9e14ab808c45096b10a751252a9a1044c3764d
+RUN wpscan --update

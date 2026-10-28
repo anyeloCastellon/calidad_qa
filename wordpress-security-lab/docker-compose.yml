@@ -1,0 +1,107 @@
+name: wordpress-security-lab
+x-wordpress-environment: &wordpress-environment
+  WORDPRESS_DB_HOST: db:3306
+  WORDPRESS_DB_USER: campus
+  WORDPRESS_DB_NAME: campus
+  WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:?Ejecute ops/setup primero}
+  LAB_PORT: ${LAB_PORT:-8088}
+  HOME: /tmp
+  LAB_ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Ejecute ops/setup primero}
+  WORDPRESS_CONFIG_EXTRA: "require_once '/opt/lab/config-extra.php';"
+x-wordpress-volumes: &wordpress-volumes
+  - wordpress:/var/www/html
+  - ./site/plugin:/var/www/html/wp-content/plugins/campus-aula:ro
+  - ./site/theme:/var/www/html/wp-content/themes/campus-abierto:ro
+  - ./student/guias:/var/www/html/material:ro
+services:
+  db:
+    image: mariadb:11.8@sha256:c4124d1afa875e47f2892edf26b482fa54f796e2f342d3717a04ca091a22a9bd
+    environment:
+      MARIADB_DATABASE: campus
+      MARIADB_USER: campus
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Ejecute ops/setup primero}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Ejecute ops/setup primero}
+    volumes:
+      - database:/var/lib/mysql
+    networks: [lab]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  wordpress:
+    image: campus-abierto-wordpress:1.0.0
+    build:
+      context: .
+      dockerfile: docker/wordpress/Dockerfile
+    environment: *wordpress-environment
+    volumes: *wordpress-volumes
+    networks: [lab]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, php, -r, "exit(@file_get_contents('http://localhost/wp-login.php')===false?1:0);"]
+      interval: 4s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+  init:
+    image: campus-abierto-wordpress:1.0.0
+    pull_policy: never
+    user: "33:33"
+    environment: *wordpress-environment
+    volumes: *wordpress-volumes
+    entrypoint: [bash, /opt/lab/seed.sh]
+    networks: [lab]
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    restart: "no"
+  gateway:
+    image: caddy:2-alpine
+    ports:
+      - "127.0.0.1:${LAB_PORT:-8088}:80"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    networks: [edge, lab]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      wordpress:
+        condition: service_healthy
+    restart: unless-stopped
+  wpcli:
+    image: campus-abierto-wordpress:1.0.0
+    pull_policy: never
+    profiles: [tools]
+    user: "33:33"
+    environment: *wordpress-environment
+    volumes: *wordpress-volumes
+    entrypoint: [wp, --path=/var/www/html]
+    networks: [lab]
+    depends_on:
+      db:
+        condition: service_healthy
+  wpscan:
+    build: ./docker/wpscan
+    profiles: [tools]
+    volumes:
+      - ./wordlists:/wordlists:ro
+      - ./student/evidencias:/evidence
+    networks: [lab]
+  sqlmap:
+    build: ./docker/sqlmap
+    profiles: [tools]
+    volumes:
+      - ./student/evidencias:/evidence
+    networks: [lab]
+volumes:
+  database:
+  wordpress:
+networks:
+  lab:
+    internal: true
+  edge: {}

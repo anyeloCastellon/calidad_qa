@@ -1,0 +1,8 @@
+WordPress 7.1.3
+
+El directorio wordpress contiene la distribución oficial de WordPress, sin configuración ni datos locales. Se conserva license.txt y la atribución de sus componentes.
+
+Origen verificado: /usr/src/wordpress de la imagen oficial
+wordpress:7.1.3-php8.3-apache@sha256:8901759bfbb7ebc567dbc44a244c0d96d720d0a67c17bc4f42ec355ddba2e863
+
+El Dockerfile copia esta distribución al construir la aplicación. Los directorios plugin y theme contienen el código específico de Campus Abierto y se montan en solo lectura.
