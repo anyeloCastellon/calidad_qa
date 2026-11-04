@@ -11,16 +11,24 @@ try {
     }
     if ($env:LAB_PORT) { $port = $env:LAB_PORT }
     $url = 'http://localhost:' + $port
-    $status = Invoke-RestMethod -Uri ($url + '/wp-json/campus/v1/status') -TimeoutSec 10
+    try { $status = Invoke-RestMethod -Uri ($url + '/wp-json/campus/v1/status') -TimeoutSec 10 }
+    catch { throw 'El portal no responde. Levanta el laboratorio con lab up.' }
     if ($status.status -ne 'ready') { throw 'El portal no ha terminado de preparar sus datos.' }
-    $version = docker compose run --rm --no-deps wpcli core version 2>$null
-    if ($LASTEXITCODE -ne 0 -or ($version | Select-Object -Last 1).Trim() -ne '7.1.3') { throw 'Revise el nucleo WordPress y la inicializacion del laboratorio.' }
-    docker compose run --rm --no-deps wpcli plugin is-active campus-aula 2>$null
-    if ($LASTEXITCODE -ne 0) { throw 'El componente Campus Aula no esta activo.' }
-    $scannerVersion = docker compose run --rm --no-deps wpscan --version 2>$null
-    if ($LASTEXITCODE -ne 0) { throw 'Construya la imagen de WPScan antes de clase.' }
-    $sqlmapVersion = docker compose run --rm --no-deps sqlmap --version 2>$null
-    if ($LASTEXITCODE -ne 0) { throw 'Construya la imagen de SQLMap antes de clase.' }
+    # Los comandos nativos de docker escriben su progreso por stderr; con
+    # ErrorActionPreference=Stop y 2>$null eso aborta en Windows PowerShell 5.1.
+    # Cambiamos a Continue solo aqui y validamos el resultado con $LASTEXITCODE.
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $version = docker compose run --rm --no-deps wpcli core version 2>$null
+        if ($LASTEXITCODE -ne 0 -or ($version | Select-Object -Last 1).Trim() -ne '7.1.3') { throw 'Revise el nucleo WordPress y la inicializacion del laboratorio.' }
+        docker compose run --rm --no-deps wpcli plugin is-active campus-aula 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'El componente Campus Aula no esta activo.' }
+        $scannerVersion = docker compose run --rm --no-deps wpscan --version 2>$null
+        if ($LASTEXITCODE -ne 0) { throw 'Construya la imagen de WPScan antes de clase.' }
+        $sqlmapVersion = docker compose run --rm --no-deps sqlmap --version 2>$null
+        if ($LASTEXITCODE -ne 0) { throw 'Construya la imagen de SQLMap antes de clase.' }
+    } finally { $ErrorActionPreference = $previousPreference }
     Write-Output ('LISTO: portal y datos disponibles en ' + $url)
     Write-Output ('WordPress ' + ($version | Select-Object -Last 1))
     Write-Output (($scannerVersion | Where-Object { $_ -match 'Current Version' }) -join '')
