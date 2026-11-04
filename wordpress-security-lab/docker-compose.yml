@@ -98,6 +98,10 @@ services:
     volumes:
       - ./student/evidencias:/evidence
     networks: [lab]
+  nmap:
+    build: ./docker/nmap
+    profiles: [tools]
+    networks: [lab]
 volumes:
   database:
   wordpress:
