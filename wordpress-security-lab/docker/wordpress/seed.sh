@@ -7,6 +7,7 @@ if ! wp core is-installed --quiet; then
 fi
 wp plugin activate campus-aula --quiet
 wp plugin activate campus-ci --quiet
+wp plugin activate campus-blog --quiet
 wp theme activate campus-abierto --quiet
 wp eval-file /opt/lab/seed.php
 wp rewrite structure '/%postname%/' --hard --quiet

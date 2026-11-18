@@ -1,0 +1,73 @@
+{
+  "id": "a1b2c3d4-0000-4a00-8a00-000000000000",
+  "version": "2.0",
+  "name": "Campus Abierto - Automatizacion 3.3",
+  "url": "http://localhost:8088",
+  "tests": [
+    {
+      "id": "a1b2c3d4-0001-4a01-8a01-000000000001",
+      "name": "AUT-01 Login_Exitoso",
+      "commands": [
+        { "id": "0101", "comment": "Abrir la pagina de acceso", "command": "open", "target": "/wp-login.php", "targets": [], "value": "" },
+        { "id": "0102", "comment": "Tamano de ventana estable", "command": "setWindowSize", "target": "1280x900", "targets": [], "value": "" },
+        { "id": "0103", "comment": "Usuario (rol editor)", "command": "type", "target": "id=user_login", "targets": [["id=user_login","id"],["name=log","name"]], "value": "redactor" },
+        { "id": "0104", "comment": "Contrasena ficticia", "command": "type", "target": "id=user_pass", "targets": [["id=user_pass","id"],["name=pwd","name"]], "value": "Aula2026" },
+        { "id": "0105", "comment": "Enviar el formulario", "command": "click", "target": "id=wp-submit", "targets": [["id=wp-submit","id"]], "value": "" },
+        { "id": "0106", "comment": "Esperar el panel de administracion", "command": "waitForElementPresent", "target": "id=wpadminbar", "targets": [["id=wpadminbar","id"]], "value": "10000" },
+        { "id": "0107", "comment": "Asercion: el escritorio esta disponible", "command": "assertElementPresent", "target": "id=menu-dashboard", "targets": [["id=menu-dashboard","id"]], "value": "" }
+      ]
+    },
+    {
+      "id": "a1b2c3d4-0002-4a02-8a02-000000000002",
+      "name": "AUT-02 Crear_Entrada",
+      "commands": [
+        { "id": "0201", "comment": "Precondicion: haber ejecutado el login", "command": "open", "target": "/wp-admin/post-new.php", "targets": [], "value": "" },
+        { "id": "0202", "comment": "Cerrar el aviso del editor si aparece", "command": "if", "target": "return document.querySelector('button[aria-label=\"Close\"]') !== null", "targets": [], "value": "" },
+        { "id": "0203", "comment": "", "command": "click", "target": "css=button[aria-label=\"Close\"]", "targets": [], "value": "" },
+        { "id": "0204", "comment": "", "command": "end", "target": "", "targets": [], "value": "" },
+        { "id": "0205", "comment": "Escribir el titulo", "command": "click", "target": "css=.editor-post-title__input, h1.wp-block-post-title", "targets": [], "value": "" },
+        { "id": "0206", "comment": "", "command": "sendKeys", "target": "css=.editor-post-title__input, h1.wp-block-post-title", "targets": [], "value": "Entrada de prueba AUT-02" },
+        { "id": "0207", "comment": "Escribir el cuerpo", "command": "click", "target": "css=.block-editor-default-block-appender__content, p.block-editor-rich-text__editable", "targets": [], "value": "" },
+        { "id": "0208", "comment": "", "command": "sendKeys", "target": "css=p.block-editor-rich-text__editable", "targets": [], "value": "Contenido generado por la prueba automatizada." },
+        { "id": "0209", "comment": "Abrir el panel de publicacion", "command": "click", "target": "css=.editor-post-publish-button__button", "targets": [], "value": "" },
+        { "id": "0210", "comment": "Confirmar la publicacion", "command": "click", "target": "css=.editor-post-publish-button", "targets": [], "value": "" },
+        { "id": "0211", "comment": "Asercion: entrada publicada", "command": "waitForElementPresent", "target": "css=.components-snackbar__content", "targets": [], "value": "15000" },
+        { "id": "0212", "comment": "", "command": "verifyText", "target": "css=.components-snackbar__content", "targets": [], "value": "*published*" }
+      ]
+    },
+    {
+      "id": "a1b2c3d4-0003-4a03-8a03-000000000003",
+      "name": "AUT-03 Moderar_Comentario",
+      "commands": [
+        { "id": "0301", "comment": "Ir a la entrada publica con comentarios", "command": "open", "target": "/bitacora-comunidad/", "targets": [], "value": "" },
+        { "id": "0302", "comment": "Escribir el comentario", "command": "type", "target": "id=comment", "targets": [["id=comment","id"]], "value": "Comentario de prueba AUT-03" },
+        { "id": "0303", "comment": "Nombre del visitante", "command": "type", "target": "id=author", "targets": [["id=author","id"]], "value": "Visitante QA" },
+        { "id": "0304", "comment": "Correo del visitante", "command": "type", "target": "id=email", "targets": [["id=email","id"]], "value": "visitante.qa@example.com" },
+        { "id": "0305", "comment": "Enviar el comentario", "command": "click", "target": "id=submit", "targets": [["id=submit","id"]], "value": "" },
+        { "id": "0306", "comment": "Asercion: queda a la espera de moderacion", "command": "waitForElementPresent", "target": "css=.comment-awaiting-moderation, p:contains('moderation')", "targets": [], "value": "10000" },
+        { "id": "0307", "comment": "Entrar como editor para moderar", "command": "open", "target": "/wp-login.php", "targets": [], "value": "" },
+        { "id": "0308", "comment": "", "command": "type", "target": "id=user_login", "targets": [["id=user_login","id"]], "value": "redactor" },
+        { "id": "0309", "comment": "", "command": "type", "target": "id=user_pass", "targets": [["id=user_pass","id"]], "value": "Aula2026" },
+        { "id": "0310", "comment": "", "command": "click", "target": "id=wp-submit", "targets": [["id=wp-submit","id"]], "value": "" },
+        { "id": "0311", "comment": "Abrir los comentarios pendientes", "command": "open", "target": "/wp-admin/edit-comments.php?comment_status=moderated", "targets": [], "value": "" },
+        { "id": "0312", "comment": "Asercion: el comentario aparece en pendientes", "command": "assertElementPresent", "target": "xpath=//*[contains(text(),'Comentario de prueba AUT-03')]", "targets": [], "value": "" }
+      ]
+    }
+  ],
+  "suites": [
+    {
+      "id": "a1b2c3d4-00f0-4af0-8af0-0000000000f0",
+      "name": "Flujos clave 3.3",
+      "persistSession": false,
+      "parallel": false,
+      "timeout": 300,
+      "tests": [
+        "a1b2c3d4-0001-4a01-8a01-000000000001",
+        "a1b2c3d4-0002-4a02-8a02-000000000002",
+        "a1b2c3d4-0003-4a03-8a03-000000000003"
+      ]
+    }
+  ],
+  "urls": ["http://localhost:8088/"],
+  "plugins": []
+}

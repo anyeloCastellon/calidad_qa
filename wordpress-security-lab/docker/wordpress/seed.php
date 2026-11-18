@@ -10,3 +10,7 @@ if (function_exists('campus_ci_seed') && get_option('campus_ci_version') !== '1.
     campus_ci_seed();
     WP_CLI::success('Boletin (actividad 3.2) preparado.');
 }
+if (function_exists('campus_blog_seed') && get_option('campus_blog_version') !== '1.0.0') {
+    campus_blog_seed();
+    WP_CLI::success('Entrada para automatizacion (actividad 3.3) preparada.');
+}
