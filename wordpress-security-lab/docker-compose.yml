@@ -11,6 +11,7 @@ x-wordpress-environment: &wordpress-environment
 x-wordpress-volumes: &wordpress-volumes
   - wordpress:/var/www/html
   - ./site/plugin:/var/www/html/wp-content/plugins/campus-aula:ro
+  - ./site/plugin-ci:/var/www/html/wp-content/plugins/campus-ci:ro
   - ./site/theme:/var/www/html/wp-content/themes/campus-abierto:ro
   - ./student/guias:/var/www/html/material:ro
 services:

@@ -1,0 +1,98 @@
+name: Seguridad WordPress Lab (3.2)
+
+# Pipeline de la actividad 3.2: materializa el enfoque Shift-Left / DevSecOps
+# de la PPT 3.2.1 sobre el WordPress Security Lab.
+#   SAST (semgrep) · Dependencias (retire.js) · Secretos (gitleaks) · DAST (OWASP ZAP)
+# Todos los controles reportan como artefactos y NO rompen el build (continue-on-error),
+# porque el laboratorio es deliberadamente vulnerable. Para convertir un control en
+# "puerta de calidad" (Fail Fast), quita su `|| true` / `continue-on-error`.
+
+on:
+  push:
+    paths:
+      - 'wordpress-security-lab/**'
+      - '.github/workflows/wordpress-lab-seguridad.yml'
+  pull_request:
+    paths:
+      - 'wordpress-security-lab/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sast:
+    name: SAST - análisis estático (semgrep)
+    runs-on: ubuntu-latest
+    container: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Escanear el código del plugin
+        run: semgrep scan --config p/php --config p/security-audit --sarif --output semgrep.sarif wordpress-security-lab/site || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sast-semgrep
+          path: semgrep.sarif
+
+  dependencias:
+    name: Dependencias - librerías de terceros (retire.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Analizar librerías JS
+        run: npx --yes retire --path wordpress-security-lab/site --outputformat json --outputpath retire.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependencias-retirejs
+          path: retire.json
+
+  secretos:
+    name: Secretos - credenciales expuestas (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Buscar secretos en el árbol de archivos
+        run: docker run --rm -v "${{ github.workspace }}:/repo" zricethezav/gitleaks:latest detect --source=/repo/wordpress-security-lab --no-git --report-format sarif --report-path /repo/gitleaks.sarif || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: secretos-gitleaks
+          path: gitleaks.sarif
+
+  dast:
+    name: DAST - escaneo dinámico (OWASP ZAP baseline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Levantar el laboratorio
+        working-directory: wordpress-security-lab
+        run: |
+          sh ops/setup.sh
+          docker compose up -d --build --wait
+      - name: Esperar a que los datos estén listos
+        run: |
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8088/wp-json/campus/v1/status || echo 000)
+            if [ "$code" = "200" ]; then echo "Portal listo"; break; fi
+            sleep 3
+          done
+      - name: ZAP Baseline contra el gateway
+        run: |
+          docker run --rm \
+            --network wordpress-security-lab_lab \
+            -v "${{ github.workspace }}/wordpress-security-lab:/zap/wrk:rw" \
+            -t ghcr.io/zaproxy/zaproxy zap-baseline.py \
+            -t http://gateway -r zap-report.html -J zap-report.json -I || true
+      - name: Publicar reporte de ZAP
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-zap-report
+          path: |
+            wordpress-security-lab/zap-report.html
+            wordpress-security-lab/zap-report.json
+      - name: Apagar el laboratorio
+        if: always()
+        working-directory: wordpress-security-lab
+        run: docker compose down -v
