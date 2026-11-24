@@ -1,0 +1,19 @@
+# Filebeat: lee el log de acceso JSON de Caddy y lo envía a Elasticsearch.
+filebeat.inputs:
+  - type: filestream
+    id: caddy-access
+    paths:
+      - /var/log/caddy/access.log
+    parsers:
+      - ndjson:
+          target: caddy
+          add_error_key: true
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "caddy-access-%{+yyyy.MM.dd}"
+
+setup.template.name: "caddy-access"
+setup.template.pattern: "caddy-access-*"
+setup.ilm.enabled: false
+logging.level: info
