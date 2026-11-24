@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <h1>Comentarios pendientes</h1>
+  <ul id="lista-comentarios">
+    {% for c in comentarios %}
+      <li class="comentario">
+        <strong>{{ c['nombre'] }}</strong> en "{{ c['titulo'] }}": {{ c['texto'] }}
+        <form method="post" action="{{ url_for('aprobar', cid=c['id']) }}" style="display:inline">
+          <button class="btn-aprobar" type="submit">Aprobar</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+  {% if not comentarios %}
+    <p id="sin-pendientes">No hay comentarios pendientes.</p>
+  {% endif %}
+{% endblock %}

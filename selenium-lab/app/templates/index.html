@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <h1>Entradas</h1>
+  <ul id="lista-entradas">
+    {% for e in entradas %}
+      <li><a href="{{ url_for('entrada', eid=e['id']) }}">{{ e['titulo'] }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

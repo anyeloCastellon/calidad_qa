@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mini-Blog QA</title>
+</head>
+<body>
+  <header>
+    <a href="{{ url_for('index') }}">Mini-Blog</a>
+    {% if session.get('usuario') %}
+      <a href="{{ url_for('admin') }}">Panel</a>
+      <a href="{{ url_for('nueva_entrada') }}">Nueva entrada</a>
+      <a href="{{ url_for('admin_comentarios') }}">Comentarios</a>
+      <a id="btn-salir" href="{{ url_for('logout') }}">Salir</a>
+    {% else %}
+      <a id="btn-ingresar" href="{{ url_for('login') }}">Ingresar</a>
+    {% endif %}
+  </header>
+
+  {% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% if mensajes %}
+      <ul id="flash">
+        {% for categoria, texto in mensajes %}
+          <li class="{{ categoria }}">{{ texto }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <main>{% block contenido %}{% endblock %}</main>
+</body>
+</html>

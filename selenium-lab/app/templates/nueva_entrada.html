@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <h1>Nueva entrada</h1>
+  <form method="post">
+    <p>
+      <label for="titulo">Título</label>
+      <input id="titulo" name="titulo">
+    </p>
+    <p>
+      <label for="cuerpo">Cuerpo</label>
+      <textarea id="cuerpo" name="cuerpo" rows="5"></textarea>
+    </p>
+    <button id="btn-publicar" type="submit">Publicar</button>
+  </form>
+{% endblock %}

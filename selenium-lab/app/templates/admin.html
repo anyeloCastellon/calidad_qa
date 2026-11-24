@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <div id="dashboard">
+    <h1>Panel de administración</h1>
+    <p>Bienvenida, {{ usuario }}.</p>
+    <ul>
+      <li><a href="{{ url_for('nueva_entrada') }}">Publicar una entrada</a></li>
+      <li><a href="{{ url_for('admin_comentarios') }}">Moderar comentarios</a></li>
+    </ul>
+  </div>
+{% endblock %}

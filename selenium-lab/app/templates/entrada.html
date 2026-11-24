@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <article>
+    <h1>{{ entrada['titulo'] }}</h1>
+    <p>{{ entrada['cuerpo'] }}</p>
+  </article>
+
+  {% if enviado %}
+    <p id="aviso-moderacion">Tu comentario quedó pendiente de moderación.</p>
+  {% endif %}
+
+  <h2>Deja un comentario</h2>
+  <form method="post">
+    <p>
+      <label for="nombre">Nombre</label>
+      <input id="nombre" name="nombre">
+    </p>
+    <p>
+      <label for="comentario">Comentario</label>
+      <textarea id="comentario" name="comentario" rows="3"></textarea>
+    </p>
+    <button id="btn-comentar" type="submit">Comentar</button>
+  </form>
+{% endblock %}

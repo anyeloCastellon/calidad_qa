@@ -1,0 +1,63 @@
+{
+  "id": "b1b2c3d4-0000-4b00-8b00-000000000000",
+  "version": "2.0",
+  "name": "Mini-Blog QA - Automatizacion 3.3",
+  "url": "http://127.0.0.1:5000",
+  "tests": [
+    {
+      "id": "b1b2c3d4-0001-4b01-8b01-000000000001",
+      "name": "AUT-01 Login_Exitoso",
+      "commands": [
+        { "id": "0101", "comment": "Abrir la pagina de acceso", "command": "open", "target": "/login", "targets": [], "value": "" },
+        { "id": "0102", "comment": "Usuario", "command": "type", "target": "id=usuario", "targets": [["id=usuario","id"]], "value": "admin" },
+        { "id": "0103", "comment": "Clave", "command": "type", "target": "id=clave", "targets": [["id=clave","id"]], "value": "Admin123" },
+        { "id": "0104", "comment": "Entrar", "command": "click", "target": "id=btn-login", "targets": [["id=btn-login","id"]], "value": "" },
+        { "id": "0105", "comment": "Asercion: el panel esta visible", "command": "assertElementPresent", "target": "id=dashboard", "targets": [["id=dashboard","id"]], "value": "" }
+      ]
+    },
+    {
+      "id": "b1b2c3d4-0002-4b02-8b02-000000000002",
+      "name": "AUT-02 Crear_Entrada",
+      "commands": [
+        { "id": "0201", "comment": "Ir al formulario de nueva entrada", "command": "open", "target": "/admin/nueva-entrada", "targets": [], "value": "" },
+        { "id": "0202", "comment": "Titulo", "command": "type", "target": "id=titulo", "targets": [["id=titulo","id"]], "value": "Entrada de prueba AUT-02" },
+        { "id": "0203", "comment": "Cuerpo", "command": "type", "target": "id=cuerpo", "targets": [["id=cuerpo","id"]], "value": "Contenido generado por la prueba automatizada." },
+        { "id": "0204", "comment": "Publicar", "command": "click", "target": "id=btn-publicar", "targets": [["id=btn-publicar","id"]], "value": "" },
+        { "id": "0205", "comment": "Asercion: entrada publicada", "command": "assertText", "target": "id=flash", "targets": [["id=flash","id"]], "value": "Entrada publicada" }
+      ]
+    },
+    {
+      "id": "b1b2c3d4-0003-4b03-8b03-000000000003",
+      "name": "AUT-03 Moderar_Comentario",
+      "commands": [
+        { "id": "0301", "comment": "Abrir una entrada publica", "command": "open", "target": "/entrada/1", "targets": [], "value": "" },
+        { "id": "0302", "comment": "Nombre del visitante", "command": "type", "target": "id=nombre", "targets": [["id=nombre","id"]], "value": "Visitante QA" },
+        { "id": "0303", "comment": "Comentario", "command": "type", "target": "id=comentario", "targets": [["id=comentario","id"]], "value": "Comentario de prueba AUT-03" },
+        { "id": "0304", "comment": "Enviar", "command": "click", "target": "id=btn-comentar", "targets": [["id=btn-comentar","id"]], "value": "" },
+        { "id": "0305", "comment": "Asercion: queda pendiente de moderacion", "command": "assertElementPresent", "target": "id=aviso-moderacion", "targets": [["id=aviso-moderacion","id"]], "value": "" },
+        { "id": "0306", "comment": "Entrar como admin", "command": "open", "target": "/login", "targets": [], "value": "" },
+        { "id": "0307", "comment": "", "command": "type", "target": "id=usuario", "targets": [["id=usuario","id"]], "value": "admin" },
+        { "id": "0308", "comment": "", "command": "type", "target": "id=clave", "targets": [["id=clave","id"]], "value": "Admin123" },
+        { "id": "0309", "comment": "", "command": "click", "target": "id=btn-login", "targets": [["id=btn-login","id"]], "value": "" },
+        { "id": "0310", "comment": "Abrir comentarios pendientes", "command": "open", "target": "/admin/comentarios", "targets": [], "value": "" },
+        { "id": "0311", "comment": "Asercion: el comentario aparece en pendientes", "command": "assertText", "target": "id=lista-comentarios", "targets": [["id=lista-comentarios","id"]], "value": "*Comentario de prueba AUT-03*" }
+      ]
+    }
+  ],
+  "suites": [
+    {
+      "id": "b1b2c3d4-00f0-4bf0-8bf0-0000000000f0",
+      "name": "Flujos clave 3.3",
+      "persistSession": false,
+      "parallel": false,
+      "timeout": 300,
+      "tests": [
+        "b1b2c3d4-0001-4b01-8b01-000000000001",
+        "b1b2c3d4-0002-4b02-8b02-000000000002",
+        "b1b2c3d4-0003-4b03-8b03-000000000003"
+      ]
+    }
+  ],
+  "urls": ["http://127.0.0.1:5000/"],
+  "plugins": []
+}
