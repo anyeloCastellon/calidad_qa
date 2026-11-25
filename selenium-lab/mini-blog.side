@@ -8,39 +8,261 @@
       "id": "b1b2c3d4-0001-4b01-8b01-000000000001",
       "name": "AUT-01 Login_Exitoso",
       "commands": [
-        { "id": "0101", "comment": "Abrir la pagina de acceso", "command": "open", "target": "/login", "targets": [], "value": "" },
-        { "id": "0102", "comment": "Usuario", "command": "type", "target": "id=usuario", "targets": [["id=usuario","id"]], "value": "admin" },
-        { "id": "0103", "comment": "Clave", "command": "type", "target": "id=clave", "targets": [["id=clave","id"]], "value": "Admin123" },
-        { "id": "0104", "comment": "Entrar", "command": "click", "target": "id=btn-login", "targets": [["id=btn-login","id"]], "value": "" },
-        { "id": "0105", "comment": "Asercion: el panel esta visible", "command": "assertElementPresent", "target": "id=dashboard", "targets": [["id=dashboard","id"]], "value": "" }
+        {
+          "id": "0101",
+          "comment": "Abrir la pagina de acceso",
+          "command": "open",
+          "target": "/login",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0102",
+          "comment": "Usuario",
+          "command": "executeScript",
+          "target": "document.getElementById(\"usuario\").value = \"admin\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0103",
+          "comment": "Clave",
+          "command": "executeScript",
+          "target": "document.getElementById(\"clave\").value = \"Admin123\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0104",
+          "comment": "Entrar",
+          "command": "click",
+          "target": "id=btn-login",
+          "targets": [
+            [
+              "id=btn-login",
+              "id"
+            ]
+          ],
+          "value": ""
+        },
+        {
+          "id": "0105",
+          "comment": "Asercion: el panel esta visible",
+          "command": "assertElementPresent",
+          "target": "id=dashboard",
+          "targets": [
+            [
+              "id=dashboard",
+              "id"
+            ]
+          ],
+          "value": ""
+        }
       ]
     },
     {
       "id": "b1b2c3d4-0002-4b02-8b02-000000000002",
       "name": "AUT-02 Crear_Entrada",
       "commands": [
-        { "id": "0201", "comment": "Ir al formulario de nueva entrada", "command": "open", "target": "/admin/nueva-entrada", "targets": [], "value": "" },
-        { "id": "0202", "comment": "Titulo", "command": "type", "target": "id=titulo", "targets": [["id=titulo","id"]], "value": "Entrada de prueba AUT-02" },
-        { "id": "0203", "comment": "Cuerpo", "command": "type", "target": "id=cuerpo", "targets": [["id=cuerpo","id"]], "value": "Contenido generado por la prueba automatizada." },
-        { "id": "0204", "comment": "Publicar", "command": "click", "target": "id=btn-publicar", "targets": [["id=btn-publicar","id"]], "value": "" },
-        { "id": "0205", "comment": "Asercion: entrada publicada", "command": "assertText", "target": "id=flash", "targets": [["id=flash","id"]], "value": "Entrada publicada" }
+        {
+          "id": "62dfe3c5-5aa6-4bbf-8b35-237c0512e36a",
+          "comment": "Entrar como admin",
+          "command": "open",
+          "target": "/login",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "acfe8759-959d-4a19-af55-f7e9a102e98f",
+          "comment": "Usuario",
+          "command": "executeScript",
+          "target": "document.getElementById(\"usuario\").value = \"admin\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "8e4f3098-bc68-4743-b727-8a15919aba66",
+          "comment": "Clave",
+          "command": "executeScript",
+          "target": "document.getElementById(\"clave\").value = \"Admin123\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "f9fbcc47-a18d-40af-b59e-836e3fcf0af4",
+          "comment": "Entrar",
+          "command": "click",
+          "target": "id=btn-login",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "31683da3-68cb-44a1-b61c-540c0d7532c4",
+          "comment": "Asercion: sesion iniciada",
+          "command": "assertElementPresent",
+          "target": "id=dashboard",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0201",
+          "comment": "Ir al formulario de nueva entrada",
+          "command": "open",
+          "target": "/admin/nueva-entrada",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0202",
+          "comment": "Titulo",
+          "command": "executeScript",
+          "target": "document.getElementById(\"titulo\").value = \"Entrada de prueba AUT-02\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0203",
+          "comment": "Cuerpo",
+          "command": "executeScript",
+          "target": "document.getElementById(\"cuerpo\").value = \"Contenido generado por la prueba automatizada.\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0204",
+          "comment": "Publicar",
+          "command": "click",
+          "target": "id=btn-publicar",
+          "targets": [
+            [
+              "id=btn-publicar",
+              "id"
+            ]
+          ],
+          "value": ""
+        },
+        {
+          "id": "0205",
+          "comment": "Asercion: entrada publicada",
+          "command": "assertText",
+          "target": "id=flash",
+          "targets": [
+            [
+              "id=flash",
+              "id"
+            ]
+          ],
+          "value": "Entrada publicada"
+        }
       ]
     },
     {
       "id": "b1b2c3d4-0003-4b03-8b03-000000000003",
       "name": "AUT-03 Moderar_Comentario",
       "commands": [
-        { "id": "0301", "comment": "Abrir una entrada publica", "command": "open", "target": "/entrada/1", "targets": [], "value": "" },
-        { "id": "0302", "comment": "Nombre del visitante", "command": "type", "target": "id=nombre", "targets": [["id=nombre","id"]], "value": "Visitante QA" },
-        { "id": "0303", "comment": "Comentario", "command": "type", "target": "id=comentario", "targets": [["id=comentario","id"]], "value": "Comentario de prueba AUT-03" },
-        { "id": "0304", "comment": "Enviar", "command": "click", "target": "id=btn-comentar", "targets": [["id=btn-comentar","id"]], "value": "" },
-        { "id": "0305", "comment": "Asercion: queda pendiente de moderacion", "command": "assertElementPresent", "target": "id=aviso-moderacion", "targets": [["id=aviso-moderacion","id"]], "value": "" },
-        { "id": "0306", "comment": "Entrar como admin", "command": "open", "target": "/login", "targets": [], "value": "" },
-        { "id": "0307", "comment": "", "command": "type", "target": "id=usuario", "targets": [["id=usuario","id"]], "value": "admin" },
-        { "id": "0308", "comment": "", "command": "type", "target": "id=clave", "targets": [["id=clave","id"]], "value": "Admin123" },
-        { "id": "0309", "comment": "", "command": "click", "target": "id=btn-login", "targets": [["id=btn-login","id"]], "value": "" },
-        { "id": "0310", "comment": "Abrir comentarios pendientes", "command": "open", "target": "/admin/comentarios", "targets": [], "value": "" },
-        { "id": "0311", "comment": "Asercion: el comentario aparece en pendientes", "command": "assertText", "target": "id=lista-comentarios", "targets": [["id=lista-comentarios","id"]], "value": "*Comentario de prueba AUT-03*" }
+        {
+          "id": "0301",
+          "comment": "Abrir una entrada publica",
+          "command": "open",
+          "target": "/entrada/1",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0302",
+          "comment": "Nombre del visitante",
+          "command": "executeScript",
+          "target": "document.getElementById(\"nombre\").value = \"Visitante QA\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0303",
+          "comment": "Comentario",
+          "command": "executeScript",
+          "target": "document.getElementById(\"comentario\").value = \"Comentario de prueba AUT-03\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0304",
+          "comment": "Enviar",
+          "command": "click",
+          "target": "id=btn-comentar",
+          "targets": [
+            [
+              "id=btn-comentar",
+              "id"
+            ]
+          ],
+          "value": ""
+        },
+        {
+          "id": "0305",
+          "comment": "Asercion: queda pendiente de moderacion",
+          "command": "assertElementPresent",
+          "target": "id=aviso-moderacion",
+          "targets": [
+            [
+              "id=aviso-moderacion",
+              "id"
+            ]
+          ],
+          "value": ""
+        },
+        {
+          "id": "0306",
+          "comment": "Entrar como admin",
+          "command": "open",
+          "target": "/login",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0307",
+          "comment": "",
+          "command": "executeScript",
+          "target": "document.getElementById(\"usuario\").value = \"admin\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0308",
+          "comment": "",
+          "command": "executeScript",
+          "target": "document.getElementById(\"clave\").value = \"Admin123\";",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0309",
+          "comment": "",
+          "command": "click",
+          "target": "id=btn-login",
+          "targets": [
+            [
+              "id=btn-login",
+              "id"
+            ]
+          ],
+          "value": ""
+        },
+        {
+          "id": "0310",
+          "comment": "Abrir comentarios pendientes",
+          "command": "open",
+          "target": "/admin/comentarios",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "0311",
+          "comment": "Asercion: el comentario aparece en pendientes",
+          "command": "assertElementPresent",
+          "target": "xpath=//*[@id='lista-comentarios'][contains(., 'Comentario de prueba AUT-03')]",
+          "targets": [],
+          "value": ""
+        }
       ]
     }
   ],
@@ -58,6 +280,8 @@
       ]
     }
   ],
-  "urls": ["http://127.0.0.1:5000/"],
+  "urls": [
+    "http://127.0.0.1:5000/"
+  ],
   "plugins": []
 }

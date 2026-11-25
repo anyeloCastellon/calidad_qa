@@ -54,9 +54,18 @@ Déjala corriendo en esa terminal.
 
 ## 2A. Probar con Selenium IDE (sin código)
 
-1. Instala la extensión **Selenium IDE** (Chrome o Firefox).
+1. Usa **Firefox**: la extensión oficial ya no está en la Chrome Web Store.
+   En addons.mozilla.org busca **Selenium IDE** y elige la publicada por
+   **Selenium** (logo azul "Se"); hay copias con el mismo nombre.
 2. Ábrela → *Open an existing project* → `mini-blog.side`.
-3. Ejecuta la suite **Flujos clave 3.3**. Verde = pasó, rojo = falló.
+3. Ejecuta `reset` para partir con datos limpios.
+4. Cambia *Tests* → **Test suites**, elige **Flujos clave 3.3** y presiona
+   **Run all tests in suite**. Verde = pasó, rojo = falló.
+
+> En Firefox reciente el comando `type` de Selenium IDE falla
+> (`initKeyEvent is not a function`). Por eso el proyecto escribe en los campos
+> con `executeScript` (`document.getElementById("usuario").value = "admin";`).
+> Si grabas tus propios tests con **REC**, reemplaza los `type` de la misma forma.
 
 ## 2B. Probar con Selenium WebDriver (Python)
 
