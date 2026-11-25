@@ -135,10 +135,20 @@ code { background: #eef0fb; padding: .1rem .35rem; border-radius: 6px; }
 .resumen-ok .resumen-num { color: var(--ok); }
 .resumen-etq { font-size: .8rem; color: var(--suave); }
 
-.filtros { display: flex; gap: .75rem; align-items: center; margin-bottom: 1.25rem; }
-.filtros .buscador { flex: 1; }
-.filtros select { width: auto; min-width: 200px; }
-.filtros > span { white-space: nowrap; font-size: .88rem; }
+.filtros { display: flex; gap: 1rem; align-items: center; margin-bottom: .75rem; flex-wrap: wrap; }
+.buscador-form { display: flex; gap: .5rem; flex: 1; min-width: 280px; }
+.buscador-form .buscador { flex: 1; }
+.chips { display: flex; gap: .4rem; flex-wrap: wrap; }
+.chip { padding: .45rem .9rem; border-radius: 999px; border: 1px solid var(--borde); background: var(--superficie);
+        color: var(--suave); font-weight: 600; font-size: .88rem; transition: all .15s; }
+.chip:hover { color: var(--texto); border-color: #c9cfdf; }
+.chip-activo { background: var(--primario); border-color: var(--primario); color: #fff; }
+.chip-alta.chip-activo { background: var(--alta); border-color: var(--alta); }
+.chip-media.chip-activo { background: var(--media); border-color: var(--media); }
+.chip-baja.chip-activo { background: var(--baja); border-color: var(--baja); }
+.barra-resultados { display: flex; justify-content: space-between; align-items: center;
+                    margin-bottom: 1.25rem; font-size: .88rem; min-height: 1.5rem; }
+.barra-resultados a { font-weight: 600; }
 
 .vacio { text-align: center; padding: 1.5rem; color: var(--suave); background: var(--superficie);
          border: 1px dashed var(--borde); border-radius: var(--radio); }
@@ -169,8 +179,12 @@ code { background: #eef0fb; padding: .1rem .35rem; border-radius: 6px; }
 .badge-baja { background: #e3f4f1; color: var(--baja); }
 .badge-categoria { background: #eef0f6; color: var(--suave); }
 
-.check { margin-top: .15rem; cursor: pointer; }
-.check input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: var(--ok); }
+.form-check { margin: .1rem 0 0; }
+.check-btn { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; cursor: pointer;
+             border-radius: 8px; border: 2px solid #c5cbe0; background: #fff; color: #fff;
+             font-size: .8rem; font-weight: 700; transition: all .15s; }
+.check-btn:hover { border-color: var(--ok); background: #e9f7f0; }
+.tarjeta-completada .check-btn { background: var(--ok); border-color: var(--ok); }
 
 /* ----------------------------------------------------------------- modal */
 .modal-fondo { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;

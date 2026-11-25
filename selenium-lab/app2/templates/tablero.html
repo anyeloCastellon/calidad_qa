@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block titulo %}Tablero · TaskFlow QA{% endblock %}
 {% macro tarjeta(t) -%}
-  <article class="tarjeta {% if t['completada'] %}tarjeta-completada{% endif %}"
-           data-testid="tarea" data-id="{{ t['id'] }}" data-titulo="{{ t['titulo'] }}"
-           data-prioridad="{{ t['prioridad'] }}">
-    <label class="check">
-      <input type="checkbox" data-testid="completar" {% if t['completada'] %}checked{% endif %}
-             aria-label="Completar {{ t['titulo'] }}">
-    </label>
+  <article id="tarea-{{ t['id'] }}" class="tarjeta {% if t['completada'] %}tarjeta-completada{% endif %}"
+           data-testid="tarea" data-titulo="{{ t['titulo'] }}" data-prioridad="{{ t['prioridad'] }}">
+    <form method="post" action="{{ url_for('completar', tid=t['id']) }}" class="form-check">
+      <button type="submit" id="completar-{{ t['id'] }}" class="check-btn" data-testid="completar"
+              title="{% if t['completada'] %}Marcar como pendiente{% else %}Marcar como completada{% endif %}"
+              aria-label="Completar {{ t['titulo'] }}">{% if t['completada'] %}✓{% endif %}</button>
+    </form>
     <div class="tarjeta-cuerpo">
       <h3 class="tarjeta-titulo" data-testid="tarea-titulo">{{ t['titulo'] }}</h3>
       {% if t['descripcion'] %}<p class="tarjeta-desc">{{ t['descripcion'] }}</p>{% endif %}
@@ -16,63 +16,82 @@
         <span class="badge badge-categoria" data-testid="tarea-categoria">{{ t['categoria'] }}</span>
       </div>
     </div>
-    <button type="button" class="btn-icono" data-testid="eliminar" title="Eliminar"
-            aria-label="Eliminar {{ t['titulo'] }}">🗑</button>
+    <button type="button" id="eliminar-{{ t['id'] }}" class="btn-icono" data-testid="eliminar"
+            data-accion="{{ url_for('eliminar', tid=t['id']) }}" data-titulo="{{ t['titulo'] }}"
+            title="Eliminar" aria-label="Eliminar {{ t['titulo'] }}">🗑</button>
   </article>
 {%- endmacro %}
 
 {% block contenido %}
 <section class="cabecera-tablero">
   <div>
-    <h1>Mis tareas</h1>
-    <p class="texto-suave">Marca, filtra y organiza tu trabajo.</p>
+    <h1 id="titulo-tablero">Mis tareas</h1>
+    <p class="texto-suave">Marca, busca y organiza tu trabajo.</p>
   </div>
   <div class="resumen">
     <div class="resumen-item">
-      <span class="resumen-num" data-testid="contador-pendientes">{{ contadores.pendientes }}</span>
+      <span id="contador-pendientes" class="resumen-num" data-testid="contador-pendientes">{{ contadores.pendientes }}</span>
       <span class="resumen-etq">Pendientes</span>
     </div>
     <div class="resumen-item resumen-ok">
-      <span class="resumen-num" data-testid="contador-completadas">{{ contadores.completadas }}</span>
+      <span id="contador-completadas" class="resumen-num" data-testid="contador-completadas">{{ contadores.completadas }}</span>
       <span class="resumen-etq">Completadas</span>
     </div>
   </div>
 </section>
 
 <section class="filtros" data-testid="filtros">
-  <input type="search" class="buscador" placeholder="Buscar tarea…" data-testid="buscar" aria-label="Buscar tarea">
-  <select data-testid="filtro-prioridad" aria-label="Filtrar por prioridad">
-    <option value="">Todas las prioridades</option>
-    {% for p in prioridades %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-  </select>
-  <span class="texto-suave" data-testid="resultados">Mostrando {{ pendientes|length + completadas|length }} tareas</span>
+  <form method="get" action="{{ url_for('tablero') }}" class="buscador-form" role="search">
+    {% if prioridad %}<input type="hidden" name="prioridad" value="{{ prioridad }}">{% endif %}
+    <input type="search" id="buscar" name="q" class="buscador" value="{{ q }}"
+           placeholder="Buscar tarea…" data-testid="buscar" aria-label="Buscar tarea">
+    <button type="submit" id="btn-buscar" class="btn btn-primario" data-testid="btn-buscar">Buscar</button>
+  </form>
+  <nav class="chips" aria-label="Filtrar por prioridad">
+    <a href="{{ url_for('tablero', q=q or None) }}" id="filtro-todas"
+       class="chip {% if not prioridad %}chip-activo{% endif %}" data-testid="filtro-todas">Todas</a>
+    {% for p in prioridades %}
+      <a href="{{ url_for('tablero', q=q or None, prioridad=p) }}" id="filtro-{{ p|lower }}"
+         class="chip chip-{{ p|lower }} {% if prioridad == p %}chip-activo{% endif %}"
+         data-testid="filtro-{{ p|lower }}">{{ p }}</a>
+    {% endfor %}
+  </nav>
 </section>
 
-<p class="vacio" data-testid="sin-resultados" hidden>No hay tareas que coincidan con la búsqueda.</p>
+<div class="barra-resultados">
+  <span id="resultados" class="texto-suave" data-testid="resultados">Mostrando {{ total }} tareas</span>
+  {% if q or prioridad %}
+    <a href="{{ url_for('tablero') }}" id="limpiar-filtros" data-testid="limpiar-filtros">Limpiar filtros ✕</a>
+  {% endif %}
+</div>
+
+{% if total == 0 %}
+  <p id="sin-resultados" class="vacio" data-testid="sin-resultados">No hay tareas que coincidan con la búsqueda.</p>
+{% endif %}
 
 <section class="columnas">
   <div class="columna" data-testid="col-pendientes">
     <h2>Pendientes</h2>
-    <div class="lista" data-testid="lista-pendientes">
+    <div id="lista-pendientes" class="lista" data-testid="lista-pendientes">
       {% for t in pendientes %}{{ tarjeta(t) }}{% endfor %}
     </div>
   </div>
   <div class="columna" data-testid="col-completadas">
     <h2>Completadas</h2>
-    <div class="lista" data-testid="lista-completadas">
+    <div id="lista-completadas" class="lista" data-testid="lista-completadas">
       {% for t in completadas %}{{ tarjeta(t) }}{% endfor %}
     </div>
   </div>
 </section>
 
-<div class="modal-fondo" data-testid="modal-confirmar" hidden>
+<div id="modal-confirmar" class="modal-fondo" data-testid="modal-confirmar" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
     <h2 id="modal-titulo">¿Eliminar tarea?</h2>
-    <p>Se eliminará «<strong data-testid="modal-tarea"></strong>». Esta acción no se puede deshacer.</p>
-    <div class="modal-acciones">
-      <button type="button" class="btn btn-fantasma" data-testid="cancelar-eliminar">Cancelar</button>
-      <button type="button" class="btn btn-peligro" data-testid="confirmar-eliminar">Eliminar</button>
-    </div>
+    <p>Se eliminará «<strong id="modal-tarea" data-testid="modal-tarea"></strong>». Esta acción no se puede deshacer.</p>
+    <form method="post" id="form-eliminar" class="modal-acciones">
+      <button type="button" id="cancelar-eliminar" class="btn btn-fantasma" data-testid="cancelar-eliminar">Cancelar</button>
+      <button type="submit" id="confirmar-eliminar" class="btn btn-peligro" data-testid="confirmar-eliminar">Eliminar</button>
+    </form>
   </div>
 </div>
 {% endblock %}

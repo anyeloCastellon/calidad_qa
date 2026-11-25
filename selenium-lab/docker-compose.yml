@@ -76,7 +76,6 @@ services:
       TASKFLOW_URL: http://taskflow:5000
       SELENIUM_REMOTE_URL: http://selenium:4444
     volumes:
-      # LAB_TESTS2_DIR permite correr otra carpeta de pruebas (p. ej. una solucion).
-      - ${LAB_TESTS2_DIR:-./tests2}:/lab/tests2:ro
+      - ./tests2:/lab/tests2:ro
       - ./resultados:/lab/resultados
-    command: ["pytest", "-v", "-p", "no:cacheprovider", "-rs", "--junitxml=resultados/junit-v2.xml", "tests2"]
+    command: ["pytest", "-v", "-p", "no:cacheprovider", "--junitxml=resultados/junit-v2.xml", "tests2"]

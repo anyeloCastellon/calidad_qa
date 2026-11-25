@@ -20,13 +20,17 @@ $appUrl  = 'http://localhost:5000'
 $gridUrl = 'http://localhost:4444'
 $vncUrl  = 'http://localhost:7900/?autoconnect=1&resize=scale'
 
+$script:CodigoCompose = 0
 function Invoke-Compose([string[]]$argumentos) {
-    # Llama a docker compose con todos los perfiles; devuelve el codigo de salida.
-    # (Los argumentos van en un arreglo: PowerShell trata "--" de forma especial.)
+    # Llama a docker compose con todos los perfiles. El codigo de salida queda en
+    # $script:CodigoCompose. Notas:
+    #  - Los argumentos van en un arreglo: PowerShell trata "--" de forma especial.
+    #  - La salida NO se pasa por una tuberia y se usa --progress plain: si no,
+    #    "docker compose build" falla en la terminal con "failed to get console".
     $prev = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    try { & docker compose @perfiles @argumentos | Out-Host } finally { $ErrorActionPreference = $prev }
-    return $LASTEXITCODE
+    try { & docker compose @perfiles --progress plain @argumentos } finally { $ErrorActionPreference = $prev }
+    $script:CodigoCompose = $LASTEXITCODE
 }
 
 function Assert-Docker {
@@ -59,10 +63,11 @@ function Start-Version([string]$v, [bool]$recrear) {
     Invoke-Compose @('rm', '--stop', '--force', $otra) | Out-Null
     if ($recrear) {
         # Solo se recrea la app (datos iniciales); el Grid se deja como esta.
-        if ((Invoke-Compose @('up', '-d', '--wait', '--force-recreate', $svc)) -ne 0) { throw ('No se pudo reiniciar la version ' + $v) }
+        Invoke-Compose @('up', '-d', '--wait', '--force-recreate', $svc)
+        if ($script:CodigoCompose -ne 0) { throw ('No se pudo reiniciar la version ' + $v) }
     }
-    $codigo = Invoke-Compose @('up', '-d', '--wait', $svc, 'selenium')
-    if ($codigo -ne 0) { throw ('No se pudo levantar la version ' + $v + '. Revisa: .\lab.ps1 logs ' + $v) }
+    Invoke-Compose @('up', '-d', '--wait', $svc, 'selenium')
+    if ($script:CodigoCompose -ne 0) { throw ('No se pudo levantar la version ' + $v + '. Revisa: .\lab.ps1 logs ' + $v) }
 }
 
 function Test-Url([string]$url) {
@@ -95,7 +100,8 @@ try {
             Assert-Docker
             $v = Resolve-Version $false
             Write-Output 'Construyendo la imagen (la primera vez puede tardar)...'
-            if ((Invoke-Compose @('build')) -ne 0) { throw 'No se pudo construir la imagen.' }
+            Invoke-Compose @('build')
+            if ($script:CodigoCompose -ne 0) { throw 'No se pudo construir la imagen.' }
             Write-Output ('Levantando ' + $versiones[$v].Nombre + ' (version ' + $v + ') y Selenium Grid...')
             Start-Version $v $false
             Write-Output ''
@@ -114,7 +120,8 @@ try {
             }
             New-Item -ItemType Directory -Force -Path (Join-Path $labRoot 'resultados') | Out-Null
             Write-Output ('Corriendo la suite de la version ' + $v + '. Mira el navegador en ' + $vncUrl)
-            $codigo = Invoke-Compose @('run', '--rm', $versiones[$v].Tests)
+            Invoke-Compose @('run', '--rm', $versiones[$v].Tests)
+            $codigo = $script:CodigoCompose
             Write-Output ''
             if ($codigo -eq 0) { Write-Output 'RESULTADO: la suite termino sin fallas.' }
             else { Write-Output 'RESULTADO: hay pruebas fallidas (revisa el detalle arriba).' }
@@ -132,7 +139,7 @@ try {
         }
         'logs' {
             $v = Resolve-Version $true
-            Invoke-Compose @('logs', $versiones[$v].Servicio) | Out-Null
+            Invoke-Compose @('logs', $versiones[$v].Servicio)
         }
         'reset' {
             Assert-Docker
@@ -141,7 +148,7 @@ try {
             Write-Output ('LISTO: ' + $versiones[$v].Nombre + ' reiniciada con los datos iniciales.')
         }
         'down' {
-            Invoke-Compose @('down') | Out-Null
+            Invoke-Compose @('down')
         }
         { $_ -in 'ayuda', 'help', 'h', '?' } {
             Show-Help

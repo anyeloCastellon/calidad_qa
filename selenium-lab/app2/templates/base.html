@@ -13,10 +13,10 @@
       <span class="marca-logo">✓</span> TaskFlow <small>QA</small>
     </a>
     <nav class="barra-nav">
-      <a href="{{ url_for('tablero') }}" data-testid="nav-tablero">Tablero</a>
-      <a href="{{ url_for('nueva_tarea') }}" class="btn btn-primario btn-sm" data-testid="nav-nueva">+ Nueva tarea</a>
-      <span class="saludo" data-testid="saludo">Hola, {{ session.get('nombre') }}</span>
-      <a href="{{ url_for('logout') }}" class="btn btn-fantasma btn-sm" data-testid="btn-salir">Salir</a>
+      <a href="{{ url_for('tablero') }}" id="nav-tablero" data-testid="nav-tablero">Tablero</a>
+      <a href="{{ url_for('nueva_tarea') }}" id="nav-nueva" class="btn btn-primario btn-sm" data-testid="nav-nueva">+ Nueva tarea</a>
+      <span id="saludo" class="saludo" data-testid="saludo">Hola, {{ session.get('nombre') }}</span>
+      <a href="{{ url_for('logout') }}" id="btn-salir" class="btn btn-fantasma btn-sm" data-testid="btn-salir">Salir</a>
     </nav>
   </header>
   {% endif %}
@@ -25,9 +25,9 @@
     {% block contenido %}{% endblock %}
   </main>
 
-  <div class="toasts" aria-live="polite">
+  <div id="avisos" class="toasts" aria-live="polite">
     {% for mensaje in get_flashed_messages() %}
-      <div class="toast" data-testid="toast" role="status">{{ mensaje }}</div>
+      <div id="toast" class="toast" data-testid="toast" role="status">{{ mensaje }}</div>
     {% endfor %}
   </div>
 

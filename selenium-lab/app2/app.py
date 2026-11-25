@@ -1,18 +1,15 @@
 """TaskFlow QA - Version 2 del laboratorio de automatizacion (Actividad 3.3).
 
-Gestor de tareas con interfaz moderna. Pensado para practicar tecnicas de
-Selenium mas alla de "escribir y hacer clic": listas desplegables, radios,
-validaciones, contenido dinamico (JavaScript + fetch), modales y avisos que
-desaparecen.
-
-Todos los elementos interactivos tienen un atributo data-testid estable.
+Gestor de tareas con interfaz moderna. Pensado para automatizar flujos reales
+de usuario con Selenium IDE: cada accion es un clic o un formulario, y cada
+elemento interactivo tiene un id (y un data-testid) estable.
 """
 import os
 import secrets
 import sqlite3
 from functools import wraps
 
-from flask import (Flask, flash, g, jsonify, redirect, render_template,
+from flask import (Flask, flash, g, redirect, render_template,
                    request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -25,13 +22,13 @@ CATEGORIAS = ["Trabajo", "Estudio", "Personal"]
 MAX_TITULO = 60
 
 TAREAS_INICIALES = [
-    ("Preparar informe de pruebas", "Consolidar resultados del sprint.", "Alta", "Trabajo", 0),
-    ("Revisar casos de regresion", "Priorizar los flujos criticos.", "Media", "Trabajo", 0),
+    ("Preparar informe de pruebas", "Consolidar los resultados del sprint.", "Alta", "Trabajo", 0),
+    ("Revisar casos de regresión", "Priorizar los flujos criticos.", "Media", "Trabajo", 0),
     ("Estudiar selectores CSS", "Practicar con data-testid.", "Media", "Estudio", 0),
-    ("Actualizar documentacion", "README del proyecto.", "Baja", "Trabajo", 0),
+    ("Actualizar documentación", "README del proyecto.", "Baja", "Trabajo", 0),
     ("Corregir bug de login", "El mensaje de error no aparece.", "Alta", "Trabajo", 0),
     ("Configurar pipeline CI", "Agregar la etapa de pruebas.", "Alta", "Trabajo", 1),
-    ("Comprar cafe para el equipo", "", "Baja", "Personal", 1),
+    ("Comprar café para el equipo", "", "Baja", "Personal", 1),
 ]
 
 
@@ -151,13 +148,25 @@ def logout():
 @login_requerido
 def tablero():
     db = get_db()
-    tareas = db.execute("SELECT * FROM tareas ORDER BY id DESC").fetchall()
+    q = request.args.get("q", "").strip()
+    prioridad = request.args.get("prioridad", "")
+    sql, params = "SELECT * FROM tareas WHERE 1 = 1", []
+    if q:
+        sql += " AND titulo LIKE ?"
+        params.append(f"%{q}%")
+    if prioridad in PRIORIDADES:
+        sql += " AND prioridad = ?"
+        params.append(prioridad)
+    tareas = db.execute(sql + " ORDER BY id DESC", params).fetchall()
     return render_template(
         "tablero.html",
         pendientes=[t for t in tareas if not t["completada"]],
         completadas=[t for t in tareas if t["completada"]],
+        total=len(tareas),
         contadores=contadores(db),
         prioridades=PRIORIDADES,
+        q=q,
+        prioridad=prioridad if prioridad in PRIORIDADES else "",
     )
 
 
@@ -185,28 +194,27 @@ def nueva_tarea():
     )
 
 
-@app.route("/api/tareas/<int:tid>/completar", methods=["POST"])
+@app.route("/tareas/<int:tid>/completar", methods=["POST"])
 @login_requerido
-def api_completar(tid):
+def completar(tid):
     db = get_db()
     fila = db.execute("SELECT completada FROM tareas WHERE id = ?", (tid,)).fetchone()
-    if fila is None:
-        return jsonify(error="No existe la tarea."), 404
-    nuevo = 0 if fila["completada"] else 1
-    db.execute("UPDATE tareas SET completada = ? WHERE id = ?", (nuevo, tid))
-    db.commit()
-    return jsonify(id=tid, completada=bool(nuevo), **contadores(db))
+    if fila is not None:
+        nuevo = 0 if fila["completada"] else 1
+        db.execute("UPDATE tareas SET completada = ? WHERE id = ?", (nuevo, tid))
+        db.commit()
+        flash("Tarea completada." if nuevo else "Tarea reabierta.")
+    return redirect(url_for("tablero"))
 
 
-@app.route("/api/tareas/<int:tid>", methods=["DELETE"])
+@app.route("/tareas/<int:tid>/eliminar", methods=["POST"])
 @login_requerido
-def api_eliminar(tid):
+def eliminar(tid):
     db = get_db()
-    cur = db.execute("DELETE FROM tareas WHERE id = ?", (tid,))
-    db.commit()
-    if cur.rowcount == 0:
-        return jsonify(error="No existe la tarea."), 404
-    return jsonify(id=tid, **contadores(db))
+    if db.execute("DELETE FROM tareas WHERE id = ?", (tid,)).rowcount:
+        db.commit()
+        flash("Tarea eliminada.")
+    return redirect(url_for("tablero"))
 
 
 if __name__ == "__main__":

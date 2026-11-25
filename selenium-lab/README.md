@@ -5,7 +5,7 @@ El laboratorio tiene **dos versiones**, ambas en http://localhost:5000:
 | Versión | App | Comando | Para qué |
 |---|---|---|---|
 | 1 | **Mini-Blog QA** | `.\lab.ps1 up` | Primeros pasos: Selenium IDE y 3 flujos guiados |
-| 2 | **TaskFlow QA** | `.\lab.ps1 up 2` | 5 casos para automatizar en clase con WebDriver ([ver abajo](#versión-2-taskflow-qa)) |
+| 2 | **TaskFlow QA** | `.\lab.ps1 up 2` | App con diseño real: 5 casos para automatizar en clase con Selenium IDE ([ver abajo](#versión-2-taskflow-qa)) |
 
 Solo corre una a la vez: `up 2` detiene la versión 1 y viceversa.
 
@@ -104,61 +104,61 @@ Variables opcionales: `BLOG_URL`, `BLOG_USER`, `BLOG_PASS`.
 
 ## Versión 2: TaskFlow QA
 
-Un **gestor de tareas** con interfaz moderna. Tiene lo que aparece en las apps
-reales y que hace interesante la automatización: listas desplegables, radios,
-validaciones, búsqueda en vivo, cambios sin recargar la página, una ventana de
-confirmación y avisos que desaparecen solos.
+Un **gestor de tareas** con diseño moderno, como los que se usan en el trabajo.
+Aquí ya no te damos el proyecto hecho: **tú automatizas los flujos con Selenium
+IDE** (Firefox), igual que en la versión 1 pero desde cero.
 
 ```powershell
 .\lab.ps1 up 2        # levanta TaskFlow QA en http://localhost:5000
-.\lab.ps1 test 2      # corre tus pruebas de tests2/
-.\lab.ps1 reset 2     # vuelve a los datos iniciales
+.\lab.ps1 reset 2     # vuelve a los datos iniciales (hazlo antes de correr tu suite)
 ```
 
-### Lo que hay que automatizar
+Cuenta: `admin` / `Admin123`. URL base para Selenium IDE: `http://127.0.0.1:5000`
 
-Tu trabajo está en [`tests2/test_taskflow.py`](tests2/test_taskflow.py): cada caso
-trae su enunciado y un `pytest.skip(...)` que debes reemplazar por tu código.
-Al comienzo la suite muestra **5 skipped**; la meta es **5 passed**.
+### Los 5 casos a automatizar
 
-| ID | Caso | Qué verifica | Técnica de Selenium |
-|---|---|---|---|
-| V2-01 | Login | Clave incorrecta → mensaje de error. Clave correcta → tablero y saludo "Hola, Admin" | Casos negativos, `@pytest.mark.parametrize` |
-| V2-02 | Crear tarea | Formulario vacío → "El titulo es obligatorio.". Tarea válida → aviso, aparece en Pendientes con su prioridad, contador +1 | `Select`, radio buttons, validaciones |
-| V2-03 | Buscar y filtrar | "bug" deja solo una tarea; filtro "Alta" muestra solo prioridad Alta; texto inexistente → "No hay tareas…" | Esperas explícitas, contar elementos **visibles** |
-| V2-04 | Completar tarea | La tarea pasa a Completadas, los contadores cambian, aparece el aviso | Contenido que cambia sin recargar (fetch) |
-| V2-05 | Eliminar con modal | Cancelar no borra; Confirmar borra, avisa, y el aviso se va solo | Modales, esperar que algo **desaparezca** |
+Cada caso es algo que un usuario real hace. Grábalo, corrígelo y agrega las
+**aserciones** que demuestran que funcionó.
 
-### Selectores
+| ID | Historia de usuario | Debe verificar |
+|---|---|---|
+| CP-01 | *Como usuario, quiero iniciar sesión para ver mis tareas.* | El saludo "Hola, Admin", que estoy en "Mis tareas" y los contadores (5 pendientes, 2 completadas) |
+| CP-02 | *Como usuario, quiero crear una tarea con prioridad y categoría.* | Título "Preparar demo de Selenium", prioridad **Alta**, categoría **Estudio** → aviso "Tarea creada correctamente.", la tarea aparece en **Pendientes** y el contador sube |
+| CP-03 | *Como usuario, quiero buscar y filtrar mis tareas.* | Buscar "bug" → un solo resultado, "Corregir bug de login". Luego filtrar **Baja** → aparecen tareas Baja y **no** aparecen tareas de otra prioridad |
+| CP-04 | *Como usuario, quiero marcar una tarea como completada.* | "Estudiar selectores CSS" pasa a **Completadas**, aviso "Tarea completada." y el contador cambia |
+| CP-05 | *Como usuario, quiero eliminar una tarea, con confirmación.* | Eliminar "Actualizar documentación": primero **Cancelar** (la tarea sigue), luego **Confirmar** → aviso "Tarea eliminada." y la tarea ya no existe |
 
-Todo elemento interactivo tiene un atributo **`data-testid`**: un identificador
-pensado *solo* para pruebas, que no cambia aunque cambie el diseño. Se usa con CSS:
+Al final arma una suite **Regresión TaskFlow** con los 5 casos, ejecuta
+`.\lab.ps1 reset 2` y córrela completa: deben quedar los 5 en verde.
 
-```python
-from ayudas import sel                       # sel("buscar") -> '[data-testid="buscar"]'
-driver.find_element(By.CSS_SELECTOR, sel("buscar"))
-```
+### Comandos de Selenium IDE que vas a necesitar
 
-| Pantalla | `data-testid` |
-|---|---|
-| Login | `usuario`, `clave`, `btn-ingresar`, `login-error` |
-| Barra superior | `saludo`, `nav-tablero`, `nav-nueva`, `btn-salir` |
-| Nueva tarea | `titulo`, `descripcion`, `prioridad` (select), `categoria-trabajo` / `categoria-estudio` / `categoria-personal` (radios), `btn-guardar`, `error-titulo`, `error-prioridad`, `error-categoria` |
-| Tablero | `contador-pendientes`, `contador-completadas`, `buscar`, `filtro-prioridad`, `resultados`, `sin-resultados`, `lista-pendientes`, `lista-completadas` |
-| Cada tarea | `tarea` (con atributos `data-titulo` y `data-prioridad`), `tarea-titulo`, `tarea-prioridad`, `tarea-categoria`, `completar` (casilla), `eliminar` |
-| Modal | `modal-confirmar`, `modal-tarea`, `cancelar-eliminar`, `confirmar-eliminar` |
-| Avisos | `toast` |
+| Para… | Command | Ejemplo de Target / Value |
+|---|---|---|
+| Abrir una página | `open` | `/login` |
+| Escribir en un campo | `execute script` | `document.getElementById("titulo").value = "Mi tarea";` |
+| Elegir en una lista | `select` | Target `id=prioridad` · Value `label=Alta` |
+| Clic (botón, enlace, radio) | `click` | `id=btn-guardar` |
+| Verificar un texto | `assert text` | Target `id=saludo` · Value `Hola, Admin` |
+| Verificar que algo existe | `assert element present` | `id=tarea-4` |
+| Verificar que algo **no** existe | `assert element not present` | `id=tarea-4` |
+| Esperar una ventana emergente | `wait for element visible` | Target `id=modal-confirmar` · Value `5000` |
 
-Tip: para buscar una tarea concreta dentro de una columna,
-`[data-testid="lista-pendientes"] [data-testid="tarea"][data-titulo="Corregir bug de login"]`.
+> En Firefox reciente el comando `type` falla (`initKeyEvent is not a function`):
+> cámbialo por `execute script`, como en la versión 1.
 
-### Reglas del juego
+### Tips
 
-1. **Nada de `time.sleep()`**: usa la fixture `wait` con `expected_conditions`.
-2. **Cada prueba se vale por sí misma**: hace su propio login y no depende de otra.
-3. **Repetible**: tu suite debe pasar dos veces seguidas *sin* `reset`.
-   Si una prueba crea o cambia datos, piensa cómo evitar que choque consigo misma.
-4. **Sin aserción no hay prueba.** Y comprueba que tu aserción puede fallar.
+- Todo elemento importante tiene un **`id`** fijo (lo verás con clic derecho →
+  *Inspeccionar*). Prefiere siempre `id=` en el Target.
+- Para encontrar una tarea por su título dentro de una columna:
+  `xpath=//div[@id='lista-pendientes']//h3[text()='Corregir bug de login']`
+- Cada caso debe **empezar con `open /logout`** y hacer su propio login: así no
+  depende de lo que dejó el caso anterior.
+- Los botones de cada tarea llevan el número de la tarea (`completar-3`,
+  `eliminar-4`). Ese número depende de los datos: por eso se corre `reset 2`.
+- Haz fallar cada aserción a propósito una vez: si nunca falla, no está probando nada.
+- `.\lab.ps1 test 2` corre solo una prueba de humo (que la app esté arriba).
 
 ## Problemas comunes
 
@@ -176,7 +176,7 @@ selenium-lab/
   docker-compose.yml    app (v1), app2 (v2), Selenium Grid y servicios de pruebas
   Dockerfile
   app2/                 TaskFlow QA (versión 2): app.py, templates/, static/
-  tests2/               plantilla de los 5 casos de la versión 2
+  tests2/               prueba de humo de la versión 2
   pytest.ini            `pytest` a secas corre la versión 1
   app/
     app.py              Flask: rutas y lógica
