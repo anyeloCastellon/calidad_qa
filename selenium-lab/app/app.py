@@ -153,4 +153,5 @@ def aprobar(cid):
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    # En Docker se escucha en 0.0.0.0 (BLOG_HOST); en local, solo 127.0.0.1.
+    app.run(host=os.environ.get("BLOG_HOST", "127.0.0.1"), port=5000, debug=True)

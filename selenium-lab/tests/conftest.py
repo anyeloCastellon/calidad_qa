@@ -5,6 +5,8 @@ Variables de entorno:
   BLOG_USER        usuario admin (por defecto admin)
   BLOG_PASS        clave (por defecto Admin123)
   SELENIUM_HEADED  "1" para ver el navegador; por defecto corre headless
+  SELENIUM_REMOTE_URL  URL de un Selenium Grid (la define Docker); si existe,
+                   el navegador corre remoto y se puede ver en http://localhost:7900
 """
 import os
 import pytest
@@ -29,11 +31,16 @@ def creds():
 @pytest.fixture
 def driver():
     options = Options()
-    if os.environ.get("SELENIUM_HEADED") != "1":
+    remote_url = os.environ.get("SELENIUM_REMOTE_URL")
+    # En el Grid el navegador va "con pantalla" para poder mirarlo por noVNC.
+    if not remote_url and os.environ.get("SELENIUM_HEADED") != "1":
         options.add_argument("--headless=new")
     options.add_argument("--window-size=1280,900")
     options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(options=options)
+    if remote_url:
+        driver = webdriver.Remote(command_executor=remote_url, options=options)
+    else:
+        driver = webdriver.Chrome(options=options)
     driver.implicitly_wait(2)
     yield driver
     driver.quit()

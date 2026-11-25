@@ -19,7 +19,28 @@ código es corto y legible.
 
 Credenciales de práctica: usuario `admin`, clave `Admin123`.
 
-## 1. Levantar la app
+## 1. Levantar el laboratorio con Docker (recomendado)
+
+Solo necesitas **Docker Desktop** corriendo. Un comando levanta el Mini-Blog y un
+**Selenium Grid** con Chrome; no hay que instalar Python ni Chrome.
+
+| Windows (PowerShell) | Linux / macOS |
+|---|---|
+| `.\lab.ps1 up` | `./lab.sh up` |
+| `.\lab.ps1 test` | `./lab.sh test` |
+| `.\lab.ps1 estado` | `./lab.sh estado` |
+| `.\lab.ps1 reset` | `./lab.sh reset` |
+| `.\lab.ps1 down` | `./lab.sh down` |
+
+- **Mini-Blog:** http://localhost:5000
+- **Ver el navegador mientras corren las pruebas:** http://localhost:7900
+  (abre esa página y luego ejecuta `test`; verás a Selenium hacer los clics).
+- `test` deja el reporte JUnit en `resultados/junit.xml`.
+- `reset` reinicia la app con la base de datos limpia.
+
+> La primera vez `up` descarga la imagen de Chrome (~1 GB); después es inmediato.
+
+## 1B. Alternativa sin Docker (Python local)
 
 ```bash
 cd selenium-lab
@@ -57,10 +78,21 @@ Variables opcionales: `BLOG_URL`, `BLOG_USER`, `BLOG_PASS`.
 | AUT-02 | Crear_Entrada | Selenium IDE / WebDriver | Pass/Fail | |
 | AUT-03 | Moderar_Comentario | Selenium IDE / WebDriver | Pass/Fail | |
 
+## Problemas comunes
+
+- **`all predefined address pools have been fully subnetted`:** Docker se quedó sin
+  rangos de red por redes viejas de otros proyectos. Ejecuta `docker network prune`
+  (borra solo redes sin contenedores) y vuelve a correr `up`.
+- **Puerto 5000 ocupado** (en macOS lo usa AirPlay): desactiva el "Receptor AirPlay"
+  o detén lo que use ese puerto.
+
 ## Estructura
 
 ```
 selenium-lab/
+  lab.ps1 / lab.sh      lanzadera: up, test, estado, reset, down
+  docker-compose.yml    app + Selenium Grid + servicio de pruebas
+  Dockerfile
   app/
     app.py              Flask: rutas y lógica
     templates/          login, panel, nueva entrada, entrada, moderación

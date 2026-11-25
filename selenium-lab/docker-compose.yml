@@ -1,0 +1,55 @@
+# Mini-Blog QA + Selenium Grid. Se opera con .\lab.ps1 (Windows) o ./lab.sh (Linux/macOS).
+#   app       Mini-Blog Flask        -> http://localhost:5000
+#   selenium  Chrome remoto (Grid)   -> http://localhost:4444  (ver el navegador: http://localhost:7900)
+#   tests     corre pytest contra el Grid (perfil "tests": solo con .\lab.ps1 test)
+name: selenium-lab
+
+services:
+  app:
+    build: .
+    environment:
+      BLOG_HOST: 0.0.0.0
+    # Nombre con el que el navegador del Grid llega a la app. No usar "app":
+    # Chrome obliga HTTPS en todo lo que termina en .app (lista HSTS).
+    networks:
+      default:
+        aliases: [miniblog]
+    ports:
+      - "127.0.0.1:5000:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  selenium:
+    # Imagen multi-arquitectura (Intel y Apple Silicon).
+    image: selenium/standalone-chromium:latest
+    shm_size: 2g
+    environment:
+      SE_VNC_NO_PASSWORD: "1"
+      SE_NODE_MAX_SESSIONS: "1"
+    ports:
+      - "127.0.0.1:4444:4444"
+      - "127.0.0.1:7900:7900"
+    healthcheck:
+      test: ["CMD", "/opt/bin/check-grid.sh", "--host", "0.0.0.0", "--port", "4444"]
+      interval: 5s
+      timeout: 10s
+      retries: 24
+
+  tests:
+    build: .
+    profiles: ["tests"]
+    depends_on:
+      app:
+        condition: service_healthy
+      selenium:
+        condition: service_healthy
+    environment:
+      BLOG_URL: http://miniblog:5000
+      SELENIUM_REMOTE_URL: http://selenium:4444
+    volumes:
+      - ./tests:/lab/tests:ro
+      - ./resultados:/lab/resultados
+    command: ["pytest", "-v", "-p", "no:cacheprovider", "--junitxml=resultados/junit.xml", "tests"]
