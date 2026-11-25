@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Ingresar · TaskFlow QA{% endblock %}
+{% block clase_body %}pagina-login{% endblock %}
+{% block contenido %}
+<section class="login-tarjeta" data-testid="login">
+  <div class="login-cabecera">
+    <span class="marca-logo marca-logo-grande">✓</span>
+    <h1>TaskFlow <small>QA</small></h1>
+    <p class="texto-suave">Organiza tus tareas. Automatiza tus pruebas.</p>
+  </div>
+
+  {% if error %}
+    <div class="alerta alerta-error" data-testid="login-error" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" class="formulario" data-testid="form-login" novalidate>
+    <label for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" autocomplete="username" data-testid="usuario"
+           value="{{ request.form.get('usuario', '') }}">
+
+    <label for="clave">Clave</label>
+    <input id="clave" name="clave" type="password" autocomplete="current-password" data-testid="clave">
+
+    <button type="submit" class="btn btn-primario btn-bloque" data-testid="btn-ingresar">Ingresar</button>
+  </form>
+  <p class="pista">Cuenta de práctica: <code>admin</code> / <code>Admin123</code></p>
+</section>
+{% endblock %}

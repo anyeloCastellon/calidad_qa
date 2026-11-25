@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Nueva tarea · TaskFlow QA{% endblock %}
+{% block contenido %}
+<section class="panel panel-form">
+  <a href="{{ url_for('tablero') }}" class="volver" data-testid="volver">← Volver al tablero</a>
+  <h1>Nueva tarea</h1>
+
+  {% if errores %}
+    <div class="alerta alerta-error" data-testid="errores-form" role="alert">
+      Revisa los campos marcados.
+    </div>
+  {% endif %}
+
+  <form method="post" class="formulario" data-testid="form-tarea" novalidate>
+    <label for="titulo">Título <span class="req">*</span></label>
+    <input id="titulo" name="titulo" data-testid="titulo" maxlength="200"
+           class="{% if errores.titulo %}campo-error{% endif %}"
+           value="{{ datos.get('titulo', '') }}" placeholder="Ej: Revisar casos de prueba">
+    <div class="contador-caracteres" data-testid="contador-titulo">0 / {{ max_titulo }}</div>
+    {% if errores.titulo %}<p class="error-campo" data-testid="error-titulo">{{ errores.titulo }}</p>{% endif %}
+
+    <label for="descripcion">Descripción</label>
+    <textarea id="descripcion" name="descripcion" rows="3" data-testid="descripcion"
+              placeholder="Opcional">{{ datos.get('descripcion', '') }}</textarea>
+
+    <label for="prioridad">Prioridad <span class="req">*</span></label>
+    <select id="prioridad" name="prioridad" data-testid="prioridad"
+            class="{% if errores.prioridad %}campo-error{% endif %}">
+      <option value="">Selecciona…</option>
+      {% for p in prioridades %}
+        <option value="{{ p }}" {% if datos.get('prioridad') == p %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+    {% if errores.prioridad %}<p class="error-campo" data-testid="error-prioridad">{{ errores.prioridad }}</p>{% endif %}
+
+    <fieldset class="radios">
+      <legend>Categoría <span class="req">*</span></legend>
+      {% for c in categorias %}
+        <label class="radio">
+          <input type="radio" name="categoria" value="{{ c }}" data-testid="categoria-{{ c|lower }}"
+                 {% if datos.get('categoria') == c %}checked{% endif %}>
+          <span>{{ c }}</span>
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% if errores.categoria %}<p class="error-campo" data-testid="error-categoria">{{ errores.categoria }}</p>{% endif %}
+
+    <div class="acciones-form">
+      <a href="{{ url_for('tablero') }}" class="btn btn-fantasma" data-testid="cancelar">Cancelar</a>
+      <button type="submit" class="btn btn-primario" data-testid="btn-guardar">Guardar tarea</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

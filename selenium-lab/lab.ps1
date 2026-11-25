@@ -1,18 +1,68 @@
 #!/usr/bin/env pwsh
-# Lanzadera del Selenium Lab (Mini-Blog QA + Selenium Grid).
+# Lanzadera del Selenium Lab.
 # Funciona en Windows PowerShell 5.1 y en PowerShell 7 (Windows, Linux, macOS).
-# Uso: .\lab.ps1 <up|test|estado|logs|reset|down|ayuda>   (tambien acepta -up, --up, etc.)
+#
+# Uso: .\lab.ps1 <comando> [version]
+#   version 1 (por defecto) = Mini-Blog QA      version 2 = TaskFlow QA
+#   Ej: .\lab.ps1 up      .\lab.ps1 up 2      .\lab.ps1 test 2      .\lab.ps1 reset 2
 $ErrorActionPreference = 'Stop'
 $labRoot = $PSScriptRoot
 $comando = if ($args.Count -ge 1) { ([string]$args[0]).TrimStart('-', '/').ToLowerInvariant() } else { 'ayuda' }
+$versionArg = if ($args.Count -ge 2) { ([string]$args[1]).TrimStart('-', '/').ToLowerInvariant().TrimStart('v') } else { '' }
+
+$perfiles = @('--profile', 'v1', '--profile', 'v2', '--profile', 'tests')
+$versiones = @{
+    '1' = @{ Servicio = 'app';  Tests = 'tests';  Nombre = 'Mini-Blog QA' }
+    '2' = @{ Servicio = 'app2'; Tests = 'tests2'; Nombre = 'TaskFlow QA' }
+}
 
 $appUrl  = 'http://localhost:5000'
 $gridUrl = 'http://localhost:4444'
 $vncUrl  = 'http://localhost:7900/?autoconnect=1&resize=scale'
 
+function Invoke-Compose([string[]]$argumentos) {
+    # Llama a docker compose con todos los perfiles; devuelve el codigo de salida.
+    # (Los argumentos van en un arreglo: PowerShell trata "--" de forma especial.)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { & docker compose @perfiles @argumentos | Out-Host } finally { $ErrorActionPreference = $prev }
+    return $LASTEXITCODE
+}
+
 function Assert-Docker {
     docker info --format '{{.ServerVersion}}' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Inicia Docker Desktop (o el servicio Docker) antes de continuar.' }
+}
+
+function Get-VersionActiva {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { $corriendo = @(docker compose @perfiles ps --status running --services) } finally { $ErrorActionPreference = $prev }
+    if ($corriendo -contains 'app2') { return '2' }
+    if ($corriendo -contains 'app') { return '1' }
+    return $null
+}
+
+function Resolve-Version([bool]$usarActiva) {
+    if ($versionArg) {
+        if (-not $versiones.ContainsKey($versionArg)) { throw ('Version no valida: ' + $versionArg + ' (usa 1 o 2)') }
+        return $versionArg
+    }
+    if ($usarActiva) { $activa = Get-VersionActiva; if ($activa) { return $activa } }
+    return '1'
+}
+
+function Start-Version([string]$v, [bool]$recrear) {
+    $svc = $versiones[$v].Servicio
+    $otra = if ($v -eq '1') { 'app2' } else { 'app' }
+    # Ambas versiones usan el puerto 5000: se detiene la otra antes de levantar esta.
+    Invoke-Compose @('rm', '--stop', '--force', $otra) | Out-Null
+    if ($recrear) {
+        # Solo se recrea la app (datos iniciales); el Grid se deja como esta.
+        if ((Invoke-Compose @('up', '-d', '--wait', '--force-recreate', $svc)) -ne 0) { throw ('No se pudo reiniciar la version ' + $v) }
+    }
+    $codigo = Invoke-Compose @('up', '-d', '--wait', $svc, 'selenium')
+    if ($codigo -ne 0) { throw ('No se pudo levantar la version ' + $v + '. Revisa: .\lab.ps1 logs ' + $v) }
 }
 
 function Test-Url([string]$url) {
@@ -21,18 +71,20 @@ function Test-Url([string]$url) {
 
 function Show-Help {
     Write-Output @'
-Selenium Lab - comandos disponibles:
+Selenium Lab - comandos disponibles (agrega 2 para la version 2):
 
-  .\lab.ps1 up       Construye la imagen y levanta el Mini-Blog y el Selenium Grid.
-                     Espera a que ambos esten listos.
-  .\lab.ps1 test     Corre la suite pytest (AUT-01, AUT-02, AUT-03) contra el Grid.
-                     Mientras corre, mira el navegador en http://localhost:7900
-                     Resultado JUnit en resultados\junit.xml
-  .\lab.ps1 estado   Comprueba que la app y el Grid respondan.
-  .\lab.ps1 logs     Muestra el registro de la app.
-  .\lab.ps1 reset    Reinicia la app con la base de datos limpia.
-  .\lab.ps1 down     Detiene y elimina los contenedores.
-  .\lab.ps1 ayuda    Muestra esta ayuda.
+  .\lab.ps1 up [2]     Construye y levanta la app y el Selenium Grid.
+                       up = Mini-Blog QA (v1)   up 2 = TaskFlow QA (v2). Ambas en :5000
+  .\lab.ps1 test [2]   Corre la suite pytest de esa version contra el Grid.
+                       Mira el navegador en http://localhost:7900
+                       Reporte JUnit en resultados\junit-v1.xml / junit-v2.xml
+  .\lab.ps1 estado     Muestra que version esta arriba y si responde.
+  .\lab.ps1 logs [2]   Muestra el registro de la app.
+  .\lab.ps1 reset [2]  Reinicia la app con los datos iniciales.
+  .\lab.ps1 down       Detiene y elimina todos los contenedores.
+  .\lab.ps1 ayuda      Muestra esta ayuda.
+
+Sin numero, test/logs/reset usan la version que este corriendo.
 '@
 }
 
@@ -41,47 +93,55 @@ try {
     switch ($comando) {
         'up' {
             Assert-Docker
+            $v = Resolve-Version $false
             Write-Output 'Construyendo la imagen (la primera vez puede tardar)...'
-            docker compose --profile tests build
-            if ($LASTEXITCODE -ne 0) { throw 'No se pudo construir la imagen.' }
-            Write-Output 'Levantando Mini-Blog y Selenium Grid...'
-            docker compose up -d --wait app selenium
-            if ($LASTEXITCODE -ne 0) { throw 'No se pudo levantar el laboratorio. Revisa: .\lab.ps1 logs' }
+            if ((Invoke-Compose @('build')) -ne 0) { throw 'No se pudo construir la imagen.' }
+            Write-Output ('Levantando ' + $versiones[$v].Nombre + ' (version ' + $v + ') y Selenium Grid...')
+            Start-Version $v $false
             Write-Output ''
-            Write-Output ('LISTO: Mini-Blog      ' + $appUrl + '   (admin / Admin123)')
+            Write-Output ('LISTO: ' + $versiones[$v].Nombre.PadRight(14) + ' ' + $appUrl + '   (admin / Admin123)')
             Write-Output ('       Selenium Grid  ' + $gridUrl)
             Write-Output ('       Ver navegador  ' + $vncUrl)
-            Write-Output 'Siguiente paso: .\lab.ps1 test'
+            $sufijo = if ($v -eq '1') { '' } else { ' ' + $v }
+            Write-Output ('Siguiente paso: .\lab.ps1 test' + $sufijo)
         }
         { $_ -in 'test', 'tests' } {
             Assert-Docker
+            $v = Resolve-Version $true
+            if ((Get-VersionActiva) -ne $v) {
+                Write-Output ('Levantando ' + $versiones[$v].Nombre + ' (version ' + $v + ')...')
+                Start-Version $v $false
+            }
             New-Item -ItemType Directory -Force -Path (Join-Path $labRoot 'resultados') | Out-Null
-            Write-Output ('Corriendo la suite. Mira el navegador en ' + $vncUrl)
-            docker compose --profile tests run --rm tests
-            $codigo = $LASTEXITCODE
+            Write-Output ('Corriendo la suite de la version ' + $v + '. Mira el navegador en ' + $vncUrl)
+            $codigo = Invoke-Compose @('run', '--rm', $versiones[$v].Tests)
             Write-Output ''
-            if ($codigo -eq 0) { Write-Output 'RESULTADO: todas las pruebas pasaron.' }
+            if ($codigo -eq 0) { Write-Output 'RESULTADO: la suite termino sin fallas.' }
             else { Write-Output 'RESULTADO: hay pruebas fallidas (revisa el detalle arriba).' }
             exit $codigo
         }
         'estado' {
+            $activa = Get-VersionActiva
+            if ($activa) { Write-Output ('Version activa: ' + $activa + ' - ' + $versiones[$activa].Nombre) }
+            else { Write-Output 'Version activa: ninguna' }
             $okApp  = Test-Url $appUrl
             $okGrid = Test-Url ($gridUrl + '/status')
-            Write-Output ('Mini-Blog     ' + $appUrl + '  -> ' + $(if ($okApp) { 'OK' } else { 'NO RESPONDE' }))
+            Write-Output ('App           ' + $appUrl + '  -> ' + $(if ($okApp) { 'OK' } else { 'NO RESPONDE' }))
             Write-Output ('Selenium Grid ' + $gridUrl + '  -> ' + $(if ($okGrid) { 'OK' } else { 'NO RESPONDE' }))
-            if ($okApp -and $okGrid) { Write-Output 'LISTO' } else { Write-Output 'Ejecuta: .\lab.ps1 up'; exit 1 }
+            if ($okApp -and $okGrid) { Write-Output 'LISTO' } else { Write-Output 'Ejecuta: .\lab.ps1 up   (o .\lab.ps1 up 2)'; exit 1 }
         }
         'logs' {
-            docker compose logs app
+            $v = Resolve-Version $true
+            Invoke-Compose @('logs', $versiones[$v].Servicio) | Out-Null
         }
         'reset' {
             Assert-Docker
-            docker compose up -d --wait --force-recreate app
-            if ($LASTEXITCODE -ne 0) { throw 'No se pudo reiniciar la app.' }
-            Write-Output 'LISTO: app reiniciada con datos limpios.'
+            $v = Resolve-Version $true
+            Start-Version $v $true
+            Write-Output ('LISTO: ' + $versiones[$v].Nombre + ' reiniciada con los datos iniciales.')
         }
         'down' {
-            docker compose --profile tests down
+            Invoke-Compose @('down') | Out-Null
         }
         { $_ -in 'ayuda', 'help', 'h', '?' } {
             Show-Help

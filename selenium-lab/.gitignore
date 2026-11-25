@@ -5,3 +5,4 @@ __pycache__/
 app/blog.db
 resultados/
 docker-compose.override.yml
+app2/taskflow.db

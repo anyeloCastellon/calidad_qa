@@ -4,3 +4,4 @@ __pycache__/
 .pytest_cache/
 app/blog.db
 resultados/
+app2/taskflow.db

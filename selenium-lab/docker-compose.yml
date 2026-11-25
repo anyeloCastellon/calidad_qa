@@ -1,12 +1,15 @@
-# Mini-Blog QA + Selenium Grid. Se opera con .\lab.ps1 (Windows) o ./lab.sh (Linux/macOS).
-#   app       Mini-Blog Flask        -> http://localhost:5000
-#   selenium  Chrome remoto (Grid)   -> http://localhost:4444  (ver el navegador: http://localhost:7900)
-#   tests     corre pytest contra el Grid (perfil "tests": solo con .\lab.ps1 test)
+# Selenium Lab. Se opera con .\lab.ps1 (Windows) o ./lab.sh (Linux/macOS).
+#   app       Version 1: Mini-Blog QA     -> http://localhost:5000   (.\lab.ps1 up)
+#   app2      Version 2: TaskFlow QA      -> http://localhost:5000   (.\lab.ps1 up 2)
+#   selenium  Chrome remoto (Grid)        -> http://localhost:4444  (ver navegador: http://localhost:7900)
+#   tests / tests2   corren pytest contra el Grid (.\lab.ps1 test / .\lab.ps1 test 2)
+# Las dos versiones usan el puerto 5000: la lanzadera levanta solo una a la vez.
 name: selenium-lab
 
 services:
   app:
     build: .
+    profiles: ["v1"]
     environment:
       BLOG_HOST: 0.0.0.0
     # Nombre con el que el navegador del Grid llega a la app. No usar "app":
@@ -18,6 +21,23 @@ services:
       - "127.0.0.1:5000:5000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  app2:
+    build: .
+    profiles: ["v2"]
+    command: ["python", "app2/app.py"]
+    environment:
+      BLOG_HOST: 0.0.0.0
+    networks:
+      default:
+        aliases: [taskflow]
+    ports:
+      - "127.0.0.1:5000:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/login', timeout=3)"]
       interval: 3s
       timeout: 5s
       retries: 20
@@ -41,15 +61,22 @@ services:
   tests:
     build: .
     profiles: ["tests"]
-    depends_on:
-      app:
-        condition: service_healthy
-      selenium:
-        condition: service_healthy
     environment:
       BLOG_URL: http://miniblog:5000
       SELENIUM_REMOTE_URL: http://selenium:4444
     volumes:
       - ./tests:/lab/tests:ro
       - ./resultados:/lab/resultados
-    command: ["pytest", "-v", "-p", "no:cacheprovider", "--junitxml=resultados/junit.xml", "tests"]
+    command: ["pytest", "-v", "-p", "no:cacheprovider", "--junitxml=resultados/junit-v1.xml", "tests"]
+
+  tests2:
+    build: .
+    profiles: ["tests"]
+    environment:
+      TASKFLOW_URL: http://taskflow:5000
+      SELENIUM_REMOTE_URL: http://selenium:4444
+    volumes:
+      # LAB_TESTS2_DIR permite correr otra carpeta de pruebas (p. ej. una solucion).
+      - ${LAB_TESTS2_DIR:-./tests2}:/lab/tests2:ro
+      - ./resultados:/lab/resultados
+    command: ["pytest", "-v", "-p", "no:cacheprovider", "-rs", "--junitxml=resultados/junit-v2.xml", "tests2"]
