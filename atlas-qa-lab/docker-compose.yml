@@ -104,14 +104,18 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
-  nmap:
-    build: ./ops/tools/nmap
+  escaner:
+    build: ./ops/tools/escaner
     profiles: [tools]
+    environment:
+      APP: http://web
+      USUARIO: admin.atlas
+      CLAVE: AtlasDemo!2026
+      HOST_REAL: host.docker.internal
+      PUERTOS: "5180,8026,5433"
+      SQLI_PATH: "/api/empresas/EID/auditoria?recurso=&buscar=cliente"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-  sqlmap:
-    build: ./ops/tools/sqlmap
-    profiles: [tools]
     volumes:
       - ./evidencias:/evidence
   zap:
