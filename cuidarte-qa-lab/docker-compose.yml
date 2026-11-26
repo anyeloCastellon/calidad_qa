@@ -20,6 +20,8 @@ services:
     depends_on:
       certificates:
         condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
     healthcheck:
       test: [CMD-SHELL, pg_isready -U cuidarte -d cuidarte]
       interval: 3s
@@ -102,6 +104,23 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+  nmap:
+    build: ./ops/tools/nmap
+    profiles: [tools]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  sqlmap:
+    build: ./ops/tools/sqlmap
+    profiles: [tools]
+    volumes:
+      - ./evidencias:/evidence
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    profiles: [tools]
+    entrypoint: [""]
+    command: ["sleep", "infinity"]
+    volumes:
+      - ./evidencias:/zap/wrk:rw
 volumes:
   certificates:
   pgdata:

@@ -239,8 +239,10 @@ export function createApiRouter() {
   router.get('/auditoria', requireAdmin, asyncRoute(async (req, res) => {
     const paging = pagination(req.query), resource = String(req.query.recurso || '')
     if (resource && !['paciente', 'examen', 'documento', 'usuario'].includes(resource)) fail(400, 'FILTRO_INVALIDO', 'Recurso inválido')
-    const total = (await pool.query("SELECT count(*)::int AS n FROM audit_events WHERE ($1='' OR recurso=$1)", [resource])).rows[0].n
-    const result = await pool.query("SELECT a.*,u.nombre_usuario AS actor FROM audit_events a LEFT JOIN users u ON u.id=a.actor_id WHERE ($1='' OR a.recurso=$1) ORDER BY a.created_at DESC,a.id LIMIT $2 OFFSET $3", [resource, paging.size, paging.offset])
+    const buscar = String(req.query.buscar || '')
+    const extra = buscar ? ` AND a.accion LIKE '%${buscar}%'` : ''
+    const total = (await pool.query(`SELECT count(*)::int AS n FROM audit_events a WHERE ($1='' OR a.recurso=$1)${extra}`, [resource])).rows[0].n
+    const result = await pool.query(`SELECT a.*,u.nombre_usuario AS actor FROM audit_events a LEFT JOIN users u ON u.id=a.actor_id WHERE ($1='' OR a.recurso=$1)${extra} ORDER BY a.created_at DESC,a.id LIMIT $2 OFFSET $3`, [resource, paging.size, paging.offset])
     res.json({ data: result.rows, meta: meta(paging, total) })
   }))
   return router

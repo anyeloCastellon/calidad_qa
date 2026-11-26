@@ -21,6 +21,7 @@ export function createApp() {
   app.use((req, res, next) => {
     req.requestId = randomUUID()
     res.setHeader('X-Request-Id', req.requestId)
+    res.setHeader('X-Cuidarte-Version', config.build)
     res.setHeader('Cache-Control', 'no-store')
     const started = Date.now()
     res.on('finish', () => console.log(JSON.stringify({ event: 'http_request', request_id: req.requestId, method: req.method, route: req.route?.path || 'unmatched', status: res.statusCode, duration_ms: Date.now() - started })))

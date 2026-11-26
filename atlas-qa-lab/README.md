@@ -25,3 +25,7 @@ Para detener el entorno:
 ```powershell
 docker compose down
 ```
+
+## Evaluación de seguridad (EP3/EP5)
+
+Pruebas con nmap, sqlmap y OWASP ZAP contra el laboratorio local: ver [SEGURIDAD.md](SEGURIDAD.md).

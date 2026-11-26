@@ -366,6 +366,7 @@ export function createApiRouter() {
       for (const field of ['accion', 'recurso']) {
         if (req.query[field]) { params.push(String(req.query[field]).slice(0, 64)); conditions.push(`a.${field}=$${params.length}`) }
       }
+      if (req.query.buscar) conditions.push(`a.accion LIKE '%${String(req.query.buscar)}%'`)
       const where = conditions.join(' AND ')
       const total = Number((await client.query(`SELECT COUNT(*) AS n FROM audit_events a WHERE ${where}`, params)).rows[0].n)
       params.push(limit, offset)
