@@ -54,6 +54,12 @@ También están disponibles en el navegador: [clase guiada](http://localhost:808
 
 El apunte de clase contiene el itinerario y la bitácora; el profesor presenta las demostraciones y los comandos de WPScan y SQLMap durante la sesión. El desafío proporciona objetivos y entregables. Las resoluciones y la pauta docente no se publican. Las evidencias que genere el estudiante se guardan en `student/evidencias/`, excluido de Git y del servidor web.
 
+## Pruebas de carga y estrés (Actividad 3.4)
+
+Con el portal arriba, `.\lab.ps1 stress A` (carga), `B` (estrés) o `C` (pico)
+ejecuta Apache JMeter dentro de Docker contra el portal y deja un reporte HTML en
+`stress/resultados/`. Detalle en [stress/README.md](stress/README.md).
+
 ## Operación del laboratorio
 
 Restaurar solo los datos y las cuentas ficticias de Campus Abierto después de guardar las evidencias:

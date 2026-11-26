@@ -1,7 +1,7 @@
 #!/bin/sh
 # Lanzadera unica del laboratorio Campus Abierto (Linux / macOS).
 # Reemplaza los comandos de preparacion y operacion por verbos simples.
-# Uso: ./lab.sh <up|estado|reset|logs|down|ayuda>
+# Uso: ./lab.sh <up|estado|reset|logs|stress|down|ayuda>
 set -eu
 labRoot="$(cd "$(dirname "$0")" && pwd)"
 cd "$labRoot"
@@ -35,6 +35,10 @@ Laboratorio Campus Abierto - comandos disponibles:
   ./lab.sh reset    Restaura los datos y las cuentas ficticias.
                     Ejecutalo despues de guardar las evidencias.
   ./lab.sh logs     Muestra el registro de la preparacion de datos.
+  ./lab.sh stress A Prueba de carga constante: 10 usuarios, 2 min    (3.4)
+  ./lab.sh stress B Prueba de estres: 0 a 500 usuarios en 5 min      (3.4)
+  ./lab.sh stress C Prueba de pico: de 10 a 200 usuarios en 10 s     (3.4)
+                    Deja el reporte HTML en stress/resultados/
   ./lab.sh down     Detiene el laboratorio (conserva el contenido).
   ./lab.sh ayuda    Muestra esta ayuda.
 EOF
@@ -100,6 +104,55 @@ case "$comando" in
     ;;
   logs)
     docker compose logs init
+    ;;
+  stress)
+    assert_docker
+    escenario="$(printf '%s' "${2:-}" | tr '[:lower:]' '[:upper:]')"
+    case "$escenario" in
+      A) nombre='Carga constante (10 usuarios, 2 min)';      props='-Ja_usuarios=10' ;;
+      B) nombre='Estres (0 a 500 usuarios en 5 min)';        props='-Jb_usuarios=500' ;;
+      C) nombre='Pico (10 usuarios + rafaga a 200 en 10 s)'; props='-Jc_base=10 -Jc_rafaga=190' ;;
+      *) echo 'Uso: ./lab.sh stress A  (carga)  |  B  (estres)  |  C  (pico)'; exit 1 ;;
+    esac
+    port="$(lab_port)"
+    if ! curl -fs -o /dev/null --max-time 10 "http://localhost:$port/"; then
+      echo 'El portal no responde. Primero: ./lab.sh up' >&2; exit 1
+    fi
+    echo 'Preparando JMeter (la primera vez descarga Java y JMeter)...'
+    docker compose --profile stress --progress plain build jmeter
+    cid="$(docker compose ps -q wordpress | head -n1)"
+    [ -n "$cid" ] || { echo 'No encuentro el contenedor de WordPress. Ejecuta: ./lab.sh up' >&2; exit 1; }
+    cpus="${LAB_STRESS_CPUS:-1}"
+    docker update --cpus "$cpus" "$cid" >/dev/null
+    rel="resultados/$escenario-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "stress/$rel"
+    stats="stress/$rel/docker-stats.csv"
+    echo 'segundo,cpu,memoria' > "$stats"
+    ( t0=$(date +%s); while :; do
+        l=$(docker stats --no-stream --format '{{.CPUPerc}},{{.MemUsage}}' "$cid")
+        echo "$(( $(date +%s) - t0 )),$l" >> "$stats"
+      done ) &
+    monitor=$!
+    # Al terminar (o con Ctrl+C): detener el monitoreo y devolver todas las CPU.
+    trap 'kill $monitor 2>/dev/null; docker update --cpus "$(docker info --format "{{.NCPU}}")" "$cid" >/dev/null' EXIT
+    echo
+    echo "Escenario $escenario: $nombre"
+    echo "Servidor WordPress limitado a $cpus CPU. Tip: en otra terminal ejecuta  docker stats"
+    echo
+    # shellcheck disable=SC2086
+    docker compose --profile stress run --rm jmeter -n -t plan-estres.jmx \
+      -l "$rel/resultados.jtl" -e -o "$rel/reporte" -j "$rel/jmeter.log" \
+      -Jhost=gateway -Jpuerto=80 "-Jhost_header=localhost:$port" \
+      -Jjmeter.reportgenerator.overall_granularity=5000 $props
+    echo
+    echo "RESUMEN escenario $escenario"
+    awk -F, 'NR==1 { for (i=1;i<=NF;i++) col[$i]=i; next }
+      { n++; t+=$col["elapsed"]; if ($col["success"]!="true") e++ }
+      END { printf "  Peticiones      : %d\n  Error %%         : %.2f %%  (%d fallidas)\n  Tiempo promedio : %d ms\n", n, (n?100*e/n:0), e, (n?t/n:0) }' \
+      "stress/$rel/resultados.jtl"
+    echo
+    echo "Reporte HTML : stress/$rel/reporte/index.html"
+    echo "CPU/memoria  : $stats"
     ;;
   down)
     docker compose down
